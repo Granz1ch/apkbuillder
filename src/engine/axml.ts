@@ -1,5 +1,5 @@
 /**
- * Запись бинарного XML (AXML) — формат, который понимает Android.
+ * Writes binary XML (AXML) — the format Android understands.
  */
 import { ByteWriter, enc } from './bytes';
 
@@ -174,7 +174,7 @@ export class AxmlWriter {
     w.u32(nodeSize);
     w.i32(0);
     w.u32(0xffffffff);
-    w.u32(0xffffffff); // ns of element (не используем префиксы у элементов)
+    w.u32(0xffffffff); // ns of element (we do not use element prefixes)
     w.u32(nameStr);
     w.u16(20); // attributeStart
     w.u16(20); // attributeSize
@@ -218,9 +218,9 @@ export class AxmlWriter {
     const nsParts: Uint8Array[] = [];
     for (const p of nsPrefixes) {
       const uri = p === 'android' ? ANDROID_NS : p;
-      // эмулируем startNs/endNs вручную, чтобы не тащить их в parts раньше времени
+      // emulate startNs/endNs manually so they are not added to parts too early
     }
-    // Собираем: namespace-узлы должны идти до элементов
+    // Assemble: namespace nodes must come before elements
     const startNsNodes: Uint8Array[] = [];
     const endNsNodes: Uint8Array[] = [];
     for (const p of nsPrefixes) {

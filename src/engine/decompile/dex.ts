@@ -1,5 +1,5 @@
 /**
- * Парсер и дизассемблер DEX (в smali-подобный текст).
+ * DEX parser and disassembler (into smali-like text).
  */
 import { dec } from '../bytes';
 
@@ -47,7 +47,7 @@ export class DexParser {
   constructor(buf: Uint8Array) {
     this.buf = buf;
     this.dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
-    if (dec.decode(buf.subarray(0, 4)) !== 'dex\n') throw new Error('DEX: неверная сигнатура');
+    if (dec.decode(buf.subarray(0, 4)) !== 'dex\n') throw new Error('DEX: invalid signature');
     this.readStringIds();
     this.readTypeIds();
     this.readProtoIds();
@@ -245,7 +245,7 @@ export class DexParser {
     return { registers, ins, outs, instructions };
   }
 
-  /* ---------- вспомогательные ---------- */
+  /* ---------- helpers ---------- */
   type(i: number) {
     return this.types[i];
   }
@@ -266,7 +266,7 @@ export class DexParser {
   }
 }
 
-/* ============================ ДИЗАСССЕМБЛЕР ============================ */
+/* ============================ DISASSEMBLER ============================ */
 
 type Fmt =
   | '10x' | '12x' | '11n' | '11x' | '10t' | '20t' | '22x' | '21t' | '21s' | '21h'
@@ -562,7 +562,7 @@ export function accessFlags(a: number): string {
   return names.filter(([m]) => (a & m) !== 0).map(([, n]) => n).join(' ');
 }
 
-/** Превращает класс в smali-подобный текст. */
+/** Turns a class into smali-like text. */
 export function classToSmali(c: DexClassInfo): string {
   const lines: string[] = [];
   lines.push(`.class ${accessFlags(c.access)} ${c.name}`);

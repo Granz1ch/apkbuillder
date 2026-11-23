@@ -23,16 +23,16 @@ export function Console() {
       <div className="console-head">
         <div className="console-title">
           <TerminalSquare size={12} />
-          Журнал сборки
+          Build log
           <span className="badge badge-neutral" style={{ height: 18 }}>
             {logs.length}
           </span>
         </div>
         <div className="spacer" />
-        <button className="btn btn-ghost btn-sm" onClick={clear} title="Очистить">
+        <button className="btn btn-ghost btn-sm" onClick={clear} title="Clear">
           <Trash2 size={13} />
         </button>
-        <button className="btn btn-ghost btn-sm" onClick={() => toggle(false)} title="Свернуть">
+        <button className="btn btn-ghost btn-sm" onClick={() => toggle(false)} title="Collapse">
           <ChevronDown size={14} />
         </button>
       </div>
@@ -42,7 +42,7 @@ export function Console() {
         style={{ height: height - 36 }}
       >
         {logs.length === 0 ? (
-          <div className="console-empty">Журнал пуст — выполните сборку или проверку</div>
+          <div className="console-empty">The log is empty — run a build or a check</div>
         ) : (
           logs.map((l) => (
             <div key={l.id} className={`log-line ${l.level}`}>

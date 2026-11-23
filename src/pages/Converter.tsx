@@ -35,21 +35,21 @@ import { loadDefaultIcon, resizePng, pngInfo } from '../engine/icon';
 import { EditorView } from '@codemirror/view';
 
 const PERMISSIONS = [
-  { id: 'android.permission.INTERNET', label: 'Интернет', on: true },
-  { id: 'android.permission.CAMERA', label: 'Камера', on: false },
-  { id: 'android.permission.RECORD_AUDIO', label: 'Микрофон', on: false },
-  { id: 'android.permission.ACCESS_FINE_LOCATION', label: 'Геолокация', on: false },
-  { id: 'android.permission.READ_EXTERNAL_STORAGE', label: 'Хранилище', on: false },
-  { id: 'android.permission.VIBRATE', label: 'Вибрация', on: false },
-  { id: 'android.permission.POST_NOTIFICATIONS', label: 'Уведомления', on: false },
+  { id: 'android.permission.INTERNET', label: 'Internet', on: true },
+  { id: 'android.permission.CAMERA', label: 'Camera', on: false },
+  { id: 'android.permission.RECORD_AUDIO', label: 'Microphone', on: false },
+  { id: 'android.permission.ACCESS_FINE_LOCATION', label: 'Location', on: false },
+  { id: 'android.permission.READ_EXTERNAL_STORAGE', label: 'Storage', on: false },
+  { id: 'android.permission.VIBRATE', label: 'Vibration', on: false },
+  { id: 'android.permission.POST_NOTIFICATIONS', label: 'Notifications', on: false },
 ];
 
 const STEPS = [
-  'Проверка исходного кода',
-  'Генерация манифеста AXML',
-  'Компиляция DEX-байткода',
-  'Сборка таблицы ресурсов',
-  'Подпись APK Signature v2',
+  'Validating source code',
+  'Generating the AXML manifest',
+  'Compiling DEX bytecode',
+  'Building the resource table',
+  'Signing with APK Signature v2',
 ];
 
 const FILE_ICONS: Record<string, any> = {
@@ -96,7 +96,7 @@ export function Converter() {
   const validateTimer = useRef<number | null>(null);
 
   const [cfg, setCfg] = useState({
-    appName: 'Моё приложение',
+    appName: 'My App',
     packageName: settings.defaultPackage,
     versionName: '1.0.0',
     versionCode: 1,
@@ -172,31 +172,31 @@ export function Converter() {
   const hasIndex = srcFiles.some((f) => f.endsWith('index.html'));
   const pyFiles = srcFiles.filter((f) => f.endsWith('.py'));
 
-  /* ---------------- сборка ---------------- */
+  /* ---------------- build ---------------- */
   const doBuild = async () => {
     const hasErr = runValidation();
     if (hasErr) {
-      toast('err', 'Есть ошибки в коде', 'Исправьте их перед сборкой');
-      log('err', 'Сборка прервана: найдены ошибки валидации', 'E-1001');
+      toast('err', 'The code has errors', 'Fix them before building');
+      log('err', 'Build aborted: validation errors found', 'E-1001');
       return;
     }
     if (!srcFiles.length) {
-      toast('err', 'Нет файлов для сборки', 'Добавьте хотя бы один файл в src/');
-      log('err', 'Сборка прервана: пустой проект', 'E-1013');
+      toast('err', 'No files to build', 'Add at least one file to src/');
+      log('err', 'Build aborted: empty project', 'E-1013');
       return;
     }
     if (!cfg.appName.trim()) {
-      toast('err', 'Укажите имя приложения', 'E-2005');
+      toast('err', 'Enter an app name', 'E-2005');
       return;
     }
     if (!isValidPackage(sanitizePackage(cfg.packageName))) {
-      toast('err', 'Некорректное имя пакета', 'Используйте формат com.example.app');
-      log('err', `Некорректное имя пакета: ${cfg.packageName}`, 'E-1012');
+      toast('err', 'Invalid package name', 'Use the com.example.app format');
+      log('err', `Invalid package name: ${cfg.packageName}`, 'E-1012');
       return;
     }
 
     setBuild({ open: true, running: true, step: 0, result: null, error: null, apkName: '', outputPath: '' });
-    log('info', `Начата сборка «${cfg.appName}»`);
+    log('info', `Building "${cfg.appName}"`);
 
     try {
       for (let i = 0; i < STEPS.length; i++) {
@@ -243,21 +243,21 @@ export function Converter() {
       setFile(outputPath, result.bytes);
       setBuild((b) => ({ ...b, running: false, step: STEPS.length, result, apkName, outputPath }));
       pushHistory({ id: `${Date.now()}`, type: 'convert', name: apkName, size: result.size, at: Date.now(), path: outputPath, ok: true });
-      log('ok', `APK собран: ${apkName} (${formatBytes(result.size)})`);
+      log('ok', `APK built: ${apkName} (${formatBytes(result.size)})`);
       for (const w of result.warnings) log('warn', w, 'E-2001');
-      toast('ok', 'APK успешно собран', `${apkName} · ${formatBytes(result.size)}`);
+      toast('ok', 'APK built successfully', `${apkName} · ${formatBytes(result.size)}`);
     } catch (e: unknown) {
       const id = (e as any)?.code ?? 'E-2002';
       const def = getErrorDef(id);
       const detail = e instanceof Error ? e.message : String(e);
       setBuild((b) => ({ ...b, running: false, error: { id, title: def.title, detail } }));
       log('err', `${def.title}: ${detail}`, id);
-      toast('err', 'Ошибка сборки', `${id} · ${def.title}`);
+      toast('err', 'Build failed', `${id} · ${def.title}`);
       pushHistory({ id: `${Date.now()}`, type: 'convert', name: cfg.appName, size: 0, at: Date.now(), ok: false, errorId: id });
     }
   };
 
-  /* ---------------- файлы ---------------- */
+  /* ---------------- files ---------------- */
   const createFile = (name: string) => {
     const path = name.startsWith('src/') ? name : `src/${name}`;
     if (files[path]) {
@@ -265,15 +265,15 @@ export function Converter() {
       return;
     }
     const templates: Record<string, string> = {
-      html: `<!DOCTYPE html>\n<html lang="ru">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>Страница</title>\n</head>\n<body>\n  <h1>Новая страница</h1>\n</body>\n</html>\n`,
-      css: `/* новый стиль */\n`,
-      js: `// новый скрипт\n`,
-      py: `# новый модуль\n`,
+      html: `<!DOCTYPE html>\n<html lang="en">\n<head>\n  <meta charset="utf-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>Page</title>\n</head>\n<body>\n  <h1>New page</h1>\n</body>\n</html>\n`,
+      css: `/* new style */\n`,
+      js: `// new script\n`,
+      py: `# new module\n`,
     };
     const e = extOf(path);
     setFile(path, new TextEncoder().encode(templates[e] ?? ''));
     setTab(path);
-    log('info', `Создан файл ${path}`);
+    log('info', `File created: ${path}`);
   };
 
   const onDropFiles = async (list: File[]) => {
@@ -321,30 +321,30 @@ export function Converter() {
     <Page wide>
       <PageHead
         num="01"
-        eyebrow="Конвертер"
+        eyebrow="Converter"
         title={
           <>
-            Код → <em>APK</em>
+            Code → <em>APK</em>
           </>
         }
-        sub="Вставьте HTML, CSS, JS или Python. Движок проверит код, подчеркнёт ошибки с объяснением и соберёт установочный APK."
+        sub="Paste HTML, CSS, JS or Python. The engine validates the code, underlines errors with an explanation and builds an installable APK."
         actions={
           <>
             <Button variant="ghost" icon={<Eye size={15} />} onClick={() => setMode(mode === 'code' ? 'preview' : 'code')}>
-              {mode === 'code' ? 'Предпросмотр' : 'Код'}
+              {mode === 'code' ? 'Preview' : 'Code'}
             </Button>
             <Button variant="ghost" icon={<CheckCircle2 size={15} />} onClick={() => runValidation()}>
-              Проверить
+              Validate
             </Button>
             <Button variant="primary" icon={<Play size={15} />} onClick={doBuild} disabled={build.running}>
-              Собрать APK
+              Build APK
             </Button>
           </>
         }
       />
 
       <div className="grid g-23" style={{ alignItems: 'start' }}>
-        {/* ---------- РЕДАКТОР ---------- */}
+        {/* ---------- EDITOR ---------- */}
         <Card style={{ height: 'calc(100dvh - 250px)', minHeight: 520, display: 'flex', flexDirection: 'column' }}>
           <div className="editor-tabs" style={{ flex: 'none' }}>
             {srcFiles.map((f) => {
@@ -369,7 +369,7 @@ export function Converter() {
                         removeFile(f);
                         setTab(srcFiles.find((x) => x !== f) ?? 'src/index.html');
                       }}
-                      title="Закрыть"
+                      title="Close"
                     >
                       ×
                     </span>
@@ -381,7 +381,7 @@ export function Converter() {
               <button
                 className="btn btn-ghost btn-icon"
                 style={{ width: 26, height: 26, borderRadius: 7 }}
-                title="Новый файл"
+                title="New file"
                 onClick={() => createFile(`new-${Date.now() % 1000}.html`)}
               >
                 <Plus size={14} />
@@ -389,7 +389,7 @@ export function Converter() {
               <button
                 className="btn btn-ghost btn-icon"
                 style={{ width: 26, height: 26, borderRadius: 7 }}
-                title="Загрузить файлы"
+                title="Upload files"
                 onClick={() => {
                   const inp = document.createElement('input');
                   inp.type = 'file';
@@ -462,7 +462,7 @@ export function Converter() {
           >
             <div className="flex gap-12">
               <span className="mono">{activeFile.replace('src/', '')}</span>
-              <span className="mono">{stats.files} файлов · {formatBytes(stats.bytes)}</span>
+              <span className="mono">{stats.files} files · {formatBytes(stats.bytes)}</span>
             </div>
             <div className="flex gap-12">
               <span className={`flex gap-6 ${errorCount ? 'text-err' : ''}`}>
@@ -478,9 +478,9 @@ export function Converter() {
           </div>
         </Card>
 
-        {/* ---------- ПАНЕЛЬ ---------- */}
+        {/* ---------- PANEL ---------- */}
         <div className="col gap-16">
-          {/* статус валидации */}
+          {/* validation status */}
           <Card>
             <div style={{ padding: 18 }}>
               <div className="flex gap-14" style={{ alignItems: 'flex-start' }}>
@@ -493,17 +493,17 @@ export function Converter() {
                 <div style={{ flex: 1 }}>
                   <div style={{ fontSize: 15, fontWeight: 620 }}>
                     {errorCount
-                      ? `${errorCount} ${plural(errorCount, ['ошибка', 'ошибки', 'ошибок'])}`
+                      ? `${errorCount} ${plural(errorCount, ['error', 'errors', 'errors'])}`
                       : warnCount
-                        ? 'Код готов, есть замечания'
-                        : 'Ошибок не найдено'}
+                        ? 'Code is ready, with notes'
+                        : 'No errors found'}
                   </div>
                   <div className="card-sub" style={{ marginTop: 3 }}>
                     {errorCount
-                      ? 'Исправьте подчёркнутые места'
+                      ? 'Fix the underlined spots'
                       : warnCount
-                        ? `${warnCount} ${plural(warnCount, ['предупреждение', 'предупреждения', 'предупреждений'])} — можно собрать`
-                        : 'Можно собирать APK'}
+                        ? `${warnCount} ${plural(warnCount, ['warning', 'warnings', 'warnings'])} — safe to build`
+                        : 'Ready to build an APK'}
                   </div>
                 </div>
                 <Badge tone={statusTone} icon={<StatusIcon size={11} />}>
@@ -512,9 +512,9 @@ export function Converter() {
               </div>
 
               <div className="flex gap-8 mt-16">
-                <Badge tone="err">{errorCount} ошибок</Badge>
-                <Badge tone="warn">{warnCount} предупреждений</Badge>
-                <Badge tone="info">{allIssues.filter((i) => i.severity === 'info').length} подсказок</Badge>
+                <Badge tone="err">{errorCount} errors</Badge>
+                <Badge tone="warn">{warnCount} warnings</Badge>
+                <Badge tone="info">{allIssues.filter((i) => i.severity === 'info').length} hints</Badge>
               </div>
 
               {allIssues.length > 0 && (
@@ -555,18 +555,18 @@ export function Converter() {
               {allIssues.length === 0 && (
                 <div className="flex gap-8 mt-16" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                   <ShieldCheck size={14} style={{ color: 'var(--ok)' }} />
-                  Структура и синтаксис в порядке. Все встроенные скрипты и стили проверены.
+                  Structure and syntax look good. All inline scripts and styles are checked.
                 </div>
               )}
             </div>
           </Card>
 
-          {/* настройки сборки */}
+          {/* build settings */}
           <Card>
             <CardHead
               icon={<Package size={16} />}
-              title="Параметры APK"
-              sub="Как приложение появится на устройстве"
+              title="APK settings"
+              sub="How the app appears on the device"
               tone="teal"
               right={
                 <span className="badge badge-neutral mono">v{cfg.versionName}</span>
@@ -574,18 +574,18 @@ export function Converter() {
             />
             <div className="col gap-14" style={{ padding: 18 }}>
               <div className="grid g-2">
-                <Field label="Имя приложения" required>
+                <Field label="App name" required>
                   <Input value={cfg.appName} onChange={(e) => setCfg({ ...cfg, appName: e.target.value })} placeholder="My App" />
                 </Field>
-                <Field label="Версия">
+                <Field label="Version">
                   <Input value={cfg.versionName} onChange={(e) => setCfg({ ...cfg, versionName: e.target.value })} />
                 </Field>
               </div>
 
               <Field
-                label="Имя пакета"
+                label="Package name"
                 required
-                error={isValidPackage(sanitizePackage(cfg.packageName)) ? undefined : 'Только латиница, цифры и точки. Минимум два сегмента.'}
+                error={isValidPackage(sanitizePackage(cfg.packageName)) ? undefined : 'Latin letters, digits and dots only. At least two segments.'}
               >
                 <Input
                   mono
@@ -596,7 +596,7 @@ export function Converter() {
               </Field>
 
               <div className="grid g-2">
-                <Field label="Версия кода">
+                <Field label="Version code">
                   <Input
                     mono
                     type="number"
@@ -604,16 +604,16 @@ export function Converter() {
                     onChange={(e) => setCfg({ ...cfg, versionCode: Number(e.target.value) })}
                   />
                 </Field>
-                <Field label="Ориентация">
+                <Field label="Orientation">
                   <Select value={cfg.orientation} onChange={(e) => setCfg({ ...cfg, orientation: e.target.value as any })}>
-                    <option value="unspecified">Авто</option>
-                    <option value="portrait">Портретная</option>
-                    <option value="landscape">Альбомная</option>
+                    <option value="unspecified">Auto</option>
+                    <option value="portrait">Portrait</option>
+                    <option value="landscape">Landscape</option>
                   </Select>
                 </Field>
               </div>
 
-              <Field label="Иконка" tip={iconName || 'PNG'}>
+              <Field label="Icon" tip={iconName || 'PNG'}>
                 <Dropzone
                   compact
                   accept="image/png,image/jpeg,image/webp"
@@ -623,7 +623,7 @@ export function Converter() {
                     const data = await readFileBytes(f);
                     const info = await pngInfo(data);
                     if (!info || info.width < 48) {
-                      toast('err', 'Слишком маленькая иконка', 'Минимум 48×48 px');
+                      toast('err', 'Icon is too small', 'At least 48×48 px');
                       return;
                     }
                     setIcon(data);
@@ -646,8 +646,8 @@ export function Converter() {
                       {icon && iconUrl ? <img src={iconUrl} style={{ width: 34, height: 34, borderRadius: 9, objectFit: 'cover' }} alt="" /> : 'A'}
                     </div>
                     <div style={{ textAlign: 'left' }}>
-                      <div style={{ fontSize: 12, fontWeight: 550 }}>{icon ? 'Иконка выбрана' : 'Загрузить PNG'}</div>
-                      <div className="tiny muted">{icon ? iconName : 'По умолчанию — логотип APK Builder'}</div>
+                      <div style={{ fontSize: 12, fontWeight: 550 }}>{icon ? 'Icon selected' : 'Upload a PNG'}</div>
+                      <div className="tiny muted">{icon ? iconName : 'Default — the APK Builder logo'}</div>
                     </div>
                   </div>
                 </Dropzone>
@@ -655,7 +655,7 @@ export function Converter() {
 
               <div>
                 <div className="label" style={{ marginBottom: 8 }}>
-                  Разрешения
+                  Permissions
                   <span className="tip">{cfg.permissions.length}</span>
                 </div>
                 <div className="flex gap-6" style={{ flexWrap: 'wrap' }}>
@@ -689,16 +689,16 @@ export function Converter() {
 
               <div className="switch-row" style={{ padding: '4px 0' }}>
                 <div>
-                  <div className="t">Подписать APK</div>
+                  <div className="t">Sign the APK</div>
                   <div className="d">
-                    {keys.length ? `Ключ: ${keys[0].alias}` : 'Ключ создастся автоматически'}
+                    {keys.length ? `Key: ${keys[0].alias}` : 'A key is created automatically'}
                   </div>
                 </div>
                 <Switch on={cfg.sign} onChange={(v) => setCfg({ ...cfg, sign: v })} />
               </div>
 
               <Button variant="primary" size="lg" block icon={<Play size={16} />} onClick={doBuild} disabled={build.running}>
-                {build.running ? 'Сборка…' : 'Собрать APK'}
+                {build.running ? 'Building…' : 'Build APK'}
               </Button>
 
               {pyFiles.length > 0 && (
@@ -708,45 +708,45 @@ export function Converter() {
                 >
                   <Info size={13} style={{ color: 'var(--info)', flex: 'none', marginTop: 1 }} />
                   <span>
-                    {pyFiles.length === 1 ? `Файл ${pyFiles[0].replace('src/', '')} — Python.` : `${pyFiles.length} Python-файлов.`}{' '}
-                    Они добавляются в APK как ассеты (<span className="mono">assets/app/*.py</span>). Для запуска Python на
-                    устройстве нужен отдельный runtime — офлайн-движок его не содержит.
+                    {pyFiles.length === 1 ? `${pyFiles[0].replace('src/', '')} is a Python file.` : `${pyFiles.length} Python files.`}{' '}
+                    They are packed into the APK as assets (<span className="mono">assets/app/*.py</span>). Running Python on
+                    a device requires a separate runtime, which the offline engine does not include.
                   </span>
                 </div>
               )}
 
               <div className="flex gap-8" style={{ fontSize: 11, color: 'var(--text-4)' }}>
                 <ShieldCheck size={12} />
-                Всё считается локально. Файлы не покидают устройство.
+                Everything runs locally. Files never leave the device.
               </div>
             </div>
           </Card>
 
-          {/* подсказка */}
+          {/* hint */}
           <Card pad>
             <div className="flex gap-12">
               <Wand2 size={16} style={{ color: 'var(--accent)', flex: 'none', marginTop: 2 }} />
               <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6 }}>
-                <b style={{ color: 'var(--text)' }}>Совет:</b> результат появится в папке{' '}
-                <span className="code-inline">convertors/</span> проекта. Откройте её через дерево проекта слева.
+                <b style={{ color: 'var(--text)' }}>Tip:</b> the result appears in the{' '}
+                <span className="code-inline">convertors/</span> folder of the project. Open it from the project tree on the left.
               </div>
             </div>
           </Card>
         </div>
       </div>
 
-      {/* ---------- МОДАЛКА СБОРКИ ---------- */}
+      {/* ---------- BUILD MODAL ---------- */}
       <Modal
         open={build.open}
         onClose={() => !build.running && setBuild((b) => ({ ...b, open: false }))}
-        title={build.error ? 'Сборка не удалась' : build.result ? 'APK готов' : 'Сборка приложения'}
+        title={build.error ? 'Build failed' : build.result ? 'APK is ready' : 'Building app'}
         sub={build.error ? build.error.id : build.result ? build.outputPath : cfg.appName}
         width={520}
         footer={
           build.result ? (
             <>
               <Button variant="ghost" onClick={() => setBuild((b) => ({ ...b, open: false }))}>
-                Закрыть
+                Close
               </Button>
               <Button
                 variant="primary"
@@ -756,12 +756,12 @@ export function Converter() {
                   if (f) downloadBytes(f, build.apkName, 'application/vnd.android.package-archive');
                 }}
               >
-                Скачать APK
+                Download APK
               </Button>
             </>
           ) : build.error ? (
             <Button variant="primary" onClick={() => setBuild((b) => ({ ...b, open: false }))}>
-              Понятно
+              Got it
             </Button>
           ) : null
         }
@@ -799,19 +799,19 @@ export function Converter() {
             {build.result && (
               <div className="grid g-3 mt-16">
                 <div className="kpi" style={{ padding: 14 }}>
-                  <div className="kpi-label">Размер</div>
+                  <div className="kpi-label">Size</div>
                   <div className="kpi-value" style={{ fontSize: 20 }}>
                     {formatBytes(build.result.size)}
                   </div>
                 </div>
                 <div className="kpi" style={{ padding: 14 }}>
-                  <div className="kpi-label">Файлов</div>
+                  <div className="kpi-label">Files</div>
                   <div className="kpi-value" style={{ fontSize: 20 }}>
                     {build.result.files.length}
                   </div>
                 </div>
                 <div className="kpi" style={{ padding: 14 }}>
-                  <div className="kpi-label">Подпись</div>
+                  <div className="kpi-label">Signature</div>
                   <div className="kpi-value" style={{ fontSize: 20 }}>
                     {cfg.sign ? 'v2' : '—'}
                   </div>
@@ -831,7 +831,7 @@ export function Converter() {
             {build.result && (
               <div className="mt-16" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                 <div className="mono tiny" style={{ color: 'var(--text-4)', marginBottom: 6 }}>
-                  СОДЕРЖИМОЕ APK
+                  APK CONTENTS
                 </div>
                 <div className="col gap-4">
                   {build.result.files.slice(0, 8).map((f) => (
@@ -842,7 +842,7 @@ export function Converter() {
                   ))}
                   {build.result.files.length > 8 && (
                     <div className="mono tiny" style={{ color: 'var(--text-4)' }}>
-                      + ещё {build.result.files.length - 8} файлов
+                      + {build.result.files.length - 8} more files
                     </div>
                   )}
                 </div>

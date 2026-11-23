@@ -26,19 +26,19 @@ import { downloadBytes, readDirectoryFiles, readFileBytes, slugify, timestampSlu
 import { loadDefaultIcon, resizePng, pngInfo } from '../engine/icon';
 
 const STEPS = [
-  'Проверка исходников',
-  'Генерация манифеста AXML',
-  'Компиляция DEX-байткода',
-  'Сборка ресурсов',
-  'Подпись APK Signature v2',
+  'Checking sources',
+  'Generating the AXML manifest',
+  'Compiling DEX bytecode',
+  'Building resources',
+  'Signing with APK Signature v2',
 ];
 
 const PERMISSIONS = [
-  { id: 'android.permission.INTERNET', label: 'Интернет' },
-  { id: 'android.permission.CAMERA', label: 'Камера' },
-  { id: 'android.permission.RECORD_AUDIO', label: 'Микрофон' },
-  { id: 'android.permission.ACCESS_FINE_LOCATION', label: 'Геолокация' },
-  { id: 'android.permission.VIBRATE', label: 'Вибрация' },
+  { id: 'android.permission.INTERNET', label: 'Internet' },
+  { id: 'android.permission.CAMERA', label: 'Camera' },
+  { id: 'android.permission.RECORD_AUDIO', label: 'Microphone' },
+  { id: 'android.permission.ACCESS_FINE_LOCATION', label: 'Location' },
+  { id: 'android.permission.VIBRATE', label: 'Vibration' },
 ];
 
 export function Builder() {
@@ -52,7 +52,7 @@ export function Builder() {
   const [mode, setMode] = useState<'pwa' | 'folder'>('pwa');
   const [cfg, setCfg] = useState({
     url: 'https://example.com',
-    appName: 'Моё веб-приложение',
+    appName: 'My Web App',
     packageName: settings.defaultPackage,
     versionName: '1.0.0',
     versionCode: 1,
@@ -84,27 +84,27 @@ export function Builder() {
 
   const doBuild = async () => {
     if (!isValidPackage(sanitizePackage(cfg.packageName))) {
-      toast('err', 'Некорректное имя пакета', 'Формат: com.example.app');
-      log('err', `Некорректное имя пакета: ${cfg.packageName}`, 'E-1012');
+      toast('err', 'Invalid package name', 'Format: com.example.app');
+      log('err', `Invalid package name: ${cfg.packageName}`, 'E-1012');
       return;
     }
     if (!cfg.appName.trim()) {
-      toast('err', 'Укажите имя приложения', 'E-2005');
+      toast('err', 'Enter an app name', 'E-2005');
       return;
     }
     if (mode === 'pwa' && !validUrl) {
-      toast('err', 'Некорректный URL', 'Адрес должен начинаться с http:// или https://');
-      log('err', `Некорректный URL: ${cfg.url}`, 'E-1014');
+      toast('err', 'Invalid URL', 'The address must start with http:// or https://');
+      log('err', `Invalid URL: ${cfg.url}`, 'E-1014');
       return;
     }
     if (mode === 'folder' && !hasIndex) {
-      toast('err', 'В папке нет index.html', 'Добавьте точку входа и повторите');
-      log('err', 'В папке проекта не найден index.html', 'E-1015');
+      toast('err', 'No index.html in the folder', 'Add an entry point and try again');
+      log('err', 'index.html not found in the project folder', 'E-1015');
       return;
     }
 
     setBuild({ open: true, running: true, step: 0, result: null, error: null, apkName: '', outputPath: '' });
-    log('info', `Сборка APK (${mode === 'pwa' ? 'PWA' : 'папка'}) — «${cfg.appName}»`);
+    log('info', `APK build (${mode === 'pwa' ? 'PWA' : 'folder'}) — "${cfg.appName}"`);
     try {
       for (let i = 0; i < STEPS.length; i++) {
         setBuild((b) => ({ ...b, step: i }));
@@ -146,16 +146,16 @@ export function Builder() {
       setFile(outputPath, result.bytes);
       setBuild((b) => ({ ...b, running: false, step: STEPS.length, result, apkName, outputPath }));
       pushHistory({ id: `${Date.now()}`, type: 'build', name: apkName, size: result.size, at: Date.now(), path: outputPath, ok: true });
-      log('ok', `APK собран: ${apkName} (${formatBytes(result.size)})`);
+      log('ok', `APK built: ${apkName} (${formatBytes(result.size)})`);
       result.warnings.forEach((w) => log('warn', w, 'E-2001'));
-      toast('ok', 'APK успешно собран', `${apkName} · ${formatBytes(result.size)}`);
+      toast('ok', 'APK built successfully', `${apkName} · ${formatBytes(result.size)}`);
     } catch (e: unknown) {
       const id = (e as any)?.code ?? 'E-2002';
       const def = getErrorDef(id);
       const detail = e instanceof Error ? e.message : String(e);
       setBuild((b) => ({ ...b, running: false, error: { id, title: def.title, detail } }));
       log('err', `${def.title}: ${detail}`, id);
-      toast('err', 'Ошибка сборки', `${id} · ${def.title}`);
+      toast('err', 'Build failed', `${id} · ${def.title}`);
       pushHistory({ id: `${Date.now()}`, type: 'build', name: cfg.appName, size: 0, at: Date.now(), ok: false, errorId: id });
     }
   };
@@ -163,40 +163,40 @@ export function Builder() {
   const onFolder = async (fs: File[]) => {
     const list = await readDirectoryFiles(fs);
     if (!list.length) {
-      toast('err', 'Папка пуста', 'Выберите папку с файлами проекта');
+      toast('err', 'The folder is empty', 'Pick a folder with project files');
       return;
     }
     const rel = (fs[0] as any).webkitRelativePath as string | undefined;
-    setFolderName(rel ? rel.split('/')[0] : 'проект');
+    setFolderName(rel ? rel.split('/')[0] : 'project');
     setFolderFiles(list);
     setMode('folder');
-    log('ok', `Загружена папка: ${list.length} файлов, ${formatBytes(list.reduce((a, f) => a + f.data.length, 0))}`);
+    log('ok', `Folder loaded: ${list.length} files, ${formatBytes(list.reduce((a, f) => a + f.data.length, 0))}`);
   };
 
   return (
     <Page>
       <PageHead
         num="02"
-        eyebrow="Сборка APK"
+        eyebrow="Build APK"
         title={
           <>
-            Два пути к <em>готовому APK</em>
+            Two paths to a <em>ready APK</em>
           </>
         }
-        sub="Соберите приложение из ссылки на сайт (PWA) или из папки проекта с HTML/CSS/JS. На выходе — подписанный APK, готовый к установке."
+        sub="Build an app from a website link (PWA) or from a project folder with HTML/CSS/JS. The output is a signed APK, ready to install."
         actions={
           <Button variant="primary" icon={<Play size={15} />} onClick={doBuild} disabled={build.running}>
-            Собрать APK
+            Build APK
           </Button>
         }
       />
 
       <div className="tabs mb-16">
         <div className={`tab ${mode === 'pwa' ? 'active' : ''}`} onClick={() => setMode('pwa')}>
-          <Globe size={13} /> По ссылке (PWA)
+          <Globe size={13} /> From a link (PWA)
         </div>
         <div className={`tab ${mode === 'folder' ? 'active' : ''}`} onClick={() => setMode('folder')}>
-          <FolderOpen size={13} /> По папке проекта
+          <FolderOpen size={13} /> From a project folder
         </div>
       </div>
 
@@ -207,14 +207,14 @@ export function Builder() {
               <CardHead
                 icon={<Globe size={16} />}
                 tone="pink"
-                title="PWA / веб-приложение"
-                sub="APK открывает сайт в нативном WebView-окне"
+                title="PWA / web app"
+                sub="The APK opens the site in a native WebView window"
               />
               <div className="col gap-14" style={{ padding: 20 }}>
                 <Field
-                  label="Адрес приложения"
+                  label="App address"
                   required
-                  error={validUrl ? undefined : 'Введите полный URL, например https://example.com'}
+                  error={validUrl ? undefined : 'Enter the full URL, for example https://example.com'}
                 >
                   <Input
                     mono
@@ -224,10 +224,10 @@ export function Builder() {
                   />
                 </Field>
                 <div className="grid g-2">
-                  <Field label="Имя приложения" required>
+                  <Field label="App name" required>
                     <Input value={cfg.appName} onChange={(e) => setCfg({ ...cfg, appName: e.target.value })} />
                   </Field>
-                  <Field label="Имя пакета" required>
+                  <Field label="Package name" required>
                     <Input
                       mono
                       value={cfg.packageName}
@@ -236,10 +236,10 @@ export function Builder() {
                   </Field>
                 </div>
                 <div className="grid g-3">
-                  <Field label="Версия">
+                  <Field label="Version">
                     <Input value={cfg.versionName} onChange={(e) => setCfg({ ...cfg, versionName: e.target.value })} />
                   </Field>
-                  <Field label="Код версии">
+                  <Field label="Version code">
                     <Input
                       mono
                       type="number"
@@ -247,20 +247,20 @@ export function Builder() {
                       onChange={(e) => setCfg({ ...cfg, versionCode: Number(e.target.value) })}
                     />
                   </Field>
-                  <Field label="Ориентация">
+                  <Field label="Orientation">
                     <Select
                       value={cfg.orientation}
                       onChange={(e) => setCfg({ ...cfg, orientation: e.target.value as any })}
                     >
-                      <option value="unspecified">Авто</option>
-                      <option value="portrait">Портрет</option>
-                      <option value="landscape">Альбом</option>
+                      <option value="unspecified">Auto</option>
+                      <option value="portrait">Portrait</option>
+                      <option value="landscape">Landscape</option>
                     </Select>
                   </Field>
                 </div>
 
                 <div className="grid g-2">
-                  <Field label="Цвет темы">
+                  <Field label="Theme color">
                     <div className="flex gap-8">
                       <input
                         type="color"
@@ -279,7 +279,7 @@ export function Builder() {
                       <Input mono value={cfg.themeColor} onChange={(e) => setCfg({ ...cfg, themeColor: e.target.value })} />
                     </div>
                   </Field>
-                  <Field label="Иконка">
+                  <Field label="Icon">
                     <Dropzone
                       compact
                       accept="image/png"
@@ -288,21 +288,21 @@ export function Builder() {
                         if (!f) return;
                         const data = await readFileBytes(f);
                         const info = await pngInfo(data);
-                        if (!info || info.width < 48) return toast('err', 'Маленькая иконка', 'Минимум 48×48');
+                        if (!info || info.width < 48) return toast('err', 'Icon is too small', 'At least 48×48');
                         setIcon(data);
                         setIconLabel(`${info.width}×${info.height}`);
                       }}
                     >
                       <div className="flex gap-10 center">
                         <Upload size={16} style={{ color: 'var(--accent)' }} />
-                        <div style={{ fontSize: 12 }}>{iconLabel || 'Загрузить PNG'}</div>
+                        <div style={{ fontSize: 12 }}>{iconLabel || 'Upload a PNG'}</div>
                       </div>
                     </Dropzone>
                   </Field>
                 </div>
 
                 <div>
-                  <div className="label" style={{ marginBottom: 8 }}>Разрешения</div>
+                  <div className="label" style={{ marginBottom: 8 }}>Permissions</div>
                   <div className="flex gap-6" style={{ flexWrap: 'wrap' }}>
                     {PERMISSIONS.map((p) => {
                       const on = cfg.permissions.includes(p.id);
@@ -334,14 +334,14 @@ export function Builder() {
 
                 <div className="switch-row" style={{ padding: '2px 0' }}>
                   <div>
-                    <div className="t">Разрешить HTTP (не HTTPS)</div>
-                    <div className="d">Полезно для локальных серверов и старых сайтов</div>
+                    <div className="t">Allow HTTP (not HTTPS)</div>
+                    <div className="d">Useful for local servers and legacy sites</div>
                   </div>
                   <Switch on={cfg.cleartext} onChange={(v) => setCfg({ ...cfg, cleartext: v })} />
                 </div>
 
                 <Button variant="primary" size="lg" block icon={<Play size={16} />} onClick={doBuild}>
-                  Собрать APK из ссылки
+                  Build APK from link
                 </Button>
               </div>
             </Card>
@@ -350,26 +350,26 @@ export function Builder() {
               <CardHead
                 icon={<FolderOpen size={16} />}
                 tone="teal"
-                title="Папка проекта"
-                sub="Все файлы попадут в assets/app, index.html станет точкой входа"
+                title="Project folder"
+                sub="All files go into assets/app, index.html becomes the entry point"
                 right={
                   folderFiles.length > 0 ? (
                     <Badge tone="ok" icon={<CheckCircle2 size={11} />}>
-                      {folderFiles.length} файлов
+                      {folderFiles.length} files
                     </Badge>
                   ) : null
                 }
               />
               <div style={{ padding: 20 }} className="col gap-14">
-                <Dropzone folder multiple onFiles={onFolder} title="Перетащите папку проекта" sub="или нажмите, чтобы выбрать папку с index.html">
+                <Dropzone folder multiple onFiles={onFolder} title="Drop the project folder" sub="or click to pick a folder with index.html">
                   <div className="ico">
                     <FolderOpen />
                   </div>
-                  <div className="t">Перетащите папку проекта</div>
+                  <div className="t">Drop the project folder</div>
                   <div className="s">
                     {folderFiles.length
-                      ? `${folderName} · ${folderFiles.length} файлов · ${formatBytes(folderSize)}`
-                      : 'или нажмите, чтобы выбрать папку с index.html'}
+                      ? `${folderName} · ${folderFiles.length} files · ${formatBytes(folderSize)}`
+                      : 'or click to pick a folder with index.html'}
                   </div>
                 </Dropzone>
 
@@ -378,11 +378,11 @@ export function Builder() {
                     <div className={`flex gap-10 ${hasIndex ? '' : ''}`} style={{ fontSize: 12 }}>
                       {hasIndex ? (
                         <Badge tone="ok" icon={<CheckCircle2 size={11} />}>
-                          index.html найден
+                          index.html found
                         </Badge>
                       ) : (
                         <Badge tone="err" icon={<AlertTriangle size={11} />}>
-                          index.html не найден
+                          index.html not found
                         </Badge>
                       )}
                       <Badge tone="neutral">{formatBytes(folderSize)}</Badge>
@@ -401,20 +401,20 @@ export function Builder() {
                       ))}
                       {folderFiles.length > 120 && (
                         <div className="tiny muted" style={{ padding: 8 }}>
-                          + ещё {folderFiles.length - 120} файлов
+                          + {folderFiles.length - 120} more files
                         </div>
                       )}
                     </div>
                     <div className="grid g-2">
-                      <Field label="Имя приложения" required>
+                      <Field label="App name" required>
                         <Input value={cfg.appName} onChange={(e) => setCfg({ ...cfg, appName: e.target.value })} />
                       </Field>
-                      <Field label="Имя пакета" required>
+                      <Field label="Package name" required>
                         <Input mono value={cfg.packageName} onChange={(e) => setCfg({ ...cfg, packageName: e.target.value })} />
                       </Field>
                     </div>
                     <Button variant="primary" size="lg" block icon={<Play size={16} />} onClick={doBuild}>
-                      Собрать APK из папки
+                      Build APK from folder
                     </Button>
                   </>
                 )}
@@ -423,18 +423,18 @@ export function Builder() {
           )}
         </div>
 
-        {/* правая колонка */}
+        {/* right column */}
         <div className="col gap-16">
           <Card>
-            <CardHead icon={<Layers size={16} />} title="Что попадёт в APK" sub="Структура собираемого пакета" />
+            <CardHead icon={<Layers size={16} />} title="What goes into the APK" sub="Structure of the package being built" />
             <div style={{ padding: 16 }} className="col gap-6">
               {[
-                ['AndroidManifest.xml', 'бинарный манифест: пакет, версия, разрешения'],
-                ['classes.dex', 'Activity-обёртка WebView'],
-                ['resources.arsc', 'имя приложения и иконка'],
-                ['res/mipmap-xxxhdpi/', 'иконка 192×192'],
-                ['assets/app/*', mode === 'folder' ? 'файлы вашего проекта' : '— (PWA-режим)'],
-                ['META-INF/', 'подпись APK Signature v2'],
+                ['AndroidManifest.xml', 'binary manifest: package, version, permissions'],
+                ['classes.dex', 'WebView Activity wrapper'],
+                ['resources.arsc', 'app name and icon'],
+                ['res/mipmap-xxxhdpi/', '192×192 icon'],
+                ['assets/app/*', mode === 'folder' ? 'your project files' : '— (PWA mode)'],
+                ['META-INF/', 'APK Signature v2 signature'],
               ].map(([n, d]) => (
                 <div key={n} className="flex gap-10" style={{ alignItems: 'flex-start' }}>
                   <FileCode2 size={13} style={{ color: 'var(--text-4)', marginTop: 2, flex: 'none' }} />
@@ -455,8 +455,8 @@ export function Builder() {
             <div className="flex gap-12">
               <Smartphone size={16} style={{ color: 'var(--accent)', flex: 'none', marginTop: 2 }} />
               <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6 }}>
-                <b style={{ color: 'var(--text)' }}>Установка:</b> разрешите «установка из неизвестных источников» и откройте APK.
-                Подпись v2 работает на Android 7.0+.
+                <b style={{ color: 'var(--text)' }}>Install:</b> allow "install from unknown sources" and open the APK.
+                The v2 signature works on Android 7.0+.
               </div>
             </div>
           </Card>
@@ -465,7 +465,7 @@ export function Builder() {
             <div className="flex gap-12">
               <Info size={16} style={{ color: 'var(--info)', flex: 'none', marginTop: 2 }} />
               <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6 }}>
-                PWA-режим загружает сайт напрямую в WebView. Для офлайн-доступа используйте сборку из папки.
+                PWA mode loads the site directly in the WebView. For offline use, build from a folder.
               </div>
             </div>
           </Card>

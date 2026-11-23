@@ -1,6 +1,6 @@
 /**
- * APK Signature Scheme v2 — подпись и проверка.
- * Реализовано вручную, без apksigner.
+ * APK Signature Scheme v2 — signing and verification.
+ * Implemented by hand, without apksigner.
  */
 import { ByteWriter, concat } from './bytes';
 
@@ -29,7 +29,7 @@ async function sha256(data: Uint8Array): Promise<Uint8Array> {
   return new Uint8Array(await crypto.subtle.digest('SHA-256', data as BufferSource));
 }
 
-/** Дайджест по спецификации v2: 1МБ чанки с префиксом длины. */
+/** Digest per the v2 spec: 1 MB chunks with a length prefix. */
 export async function chunkedDigest(data: Uint8Array): Promise<Uint8Array> {
   const chunks: Uint8Array[] = [];
   for (let i = 0; i < data.length; i += CHUNK_SIZE) {
@@ -61,12 +61,12 @@ export function findEocd(zip: Uint8Array): ZipInfo {
       };
     }
   }
-  throw new Error('ZIP: EOCD не найден');
+  throw new Error('ZIP: EOCD not found');
 }
 
 /**
- * Подписывает готовый ZIP по схеме v2.
- * Возвращает новый массив байтов с блоком подписи перед центральной директорией.
+ * Signs a finished ZIP with the v2 scheme.
+ * Returns a new byte array with the signing block inserted before the central directory.
  */
 export async function signApkV2(
   zip: Uint8Array,
@@ -77,20 +77,20 @@ export async function signApkV2(
   const info = findEocd(zip);
   const signingBlockStart = info.cdOffset;
 
-  // 1) дайджест содержимого
+  // 1) content digest
   const entriesSection = zip.subarray(0, signingBlockStart);
   const cdSection = zip.subarray(info.cdOffset, info.cdOffset + info.cdSize);
-  // EOCD: поле смещения CD заменяем на смещение блока подписи
+  // EOCD: replace the CD offset field with the signing block offset
   const eocd = new Uint8Array(info.eocd);
   new DataView(eocd.buffer).setUint32(16, signingBlockStart, true);
 
   const digest = await chunkedDigest(concat([entriesSection, cdSection, eocd]));
 
-  // 2) signed data — формат apksig (encodeAsSequenceOfLengthPrefixedElements):
+  // 2) signed data — apksig format (encodeAsSequenceOfLengthPrefixedElements):
   //    [len] digests-blob    { [rec_len=8+n][algo u32][digest_len u32][digest] }
   //    [len] certs-blob      { [len][cert DER] }
-  //    [len] attributes-blob { ... } — для v2 пусто
-  //    [len] пустой элемент  { }
+  //    [len] attributes-blob { ... } — empty for v2
+  //    [len] empty element   { }
   const digestRec = concat([u32(8 + digest.length), u32(ALG_RSA_PKCS1_SHA256), u32(digest.length), digest]);
   const certsBlob = concat([u32(certificate.length), certificate]);
   const signedData = concat([
@@ -102,7 +102,7 @@ export async function signApkV2(
     u32(0),
   ]);
 
-  // 3) подпись
+  // 3) signature
   const sig = new Uint8Array(await crypto.subtle.sign({ name: 'RSASSA-PKCS1-v1_5' }, privateKey, signedData as BufferSource));
   // signatures: [len] blob { [rec_len=8+n][algo u32][sig_len u32][sig] }
   const sigRec = concat([u32(8 + sig.length), u32(ALG_RSA_PKCS1_SHA256), u32(sig.length), sig]);
@@ -117,14 +117,14 @@ export async function signApkV2(
   ]);
   const signers = concat([u32(signer.length), signer]);
 
-  // 4) блок подписи
+  // 4) signing block
   const value = concat([u32(signers.length), signers]);
   const pair = concat([u32(V2_SIGNATURE_ID), value]);
   const pairWithLen = concat([u64(pair.length), pair]);
   const sizeOfBlock = pairWithLen.length + 24;
   const block = concat([u64(sizeOfBlock), pairWithLen, u64(sizeOfBlock), APK_SIG_MAGIC]);
 
-  // 5) вставляем блок и правим смещение CD в EOCD
+  // 5) insert the block and patch the CD offset in EOCD
   const out = new Uint8Array(zip.length + block.length);
   out.set(zip.subarray(0, signingBlockStart), 0);
   out.set(block, signingBlockStart);
@@ -135,7 +135,7 @@ export async function signApkV2(
   return { bytes: out, digest };
 }
 
-/* ----------------------------- проверка ----------------------------- */
+/* ----------------------------- verification ----------------------------- */
 
 export interface SignatureInfo {
   signedV2: boolean;
@@ -214,11 +214,11 @@ function decAscii(b: Uint8Array): string {
   return s;
 }
 
-/** Ищет в DER сертификата значение CN (или всю строку subject/issuer). */
+/** Finds the CN value (or the whole subject/issuer string) in a certificate DER. */
 function readCertField(der: Uint8Array, which: 'subject' | 'issuer'): string | undefined {
   // TBSCertificate: SEQ [0]version, serial, sigAlg, issuer, validity, subject, spki
-  // Ищем все Name-структуры: SEQ { SET { SEQ { OID, value } } }
-  // Проще: найти все вхождения OID 2.5.4.3 (CN) и вернуть первое (issuer) / второе (subject)
+  // Look for Name structures: SEQ { SET { SEQ { OID, value } } }
+  // Simpler: find all occurrences of OID 2.5.4.3 (CN) and return the first (issuer) / last (subject)
   const oids: number[] = [];
   for (let i = 0; i < der.length - 5; i++) {
     if (der[i] === 0x06 && der[i + 1] === 0x03 && der[i + 2] === 0x55 && der[i + 3] === 0x04 && der[i + 4] === 0x03) {
@@ -235,8 +235,8 @@ function readCertField(der: Uint8Array, which: 'subject' | 'issuer'): string | u
 }
 
 function readCertValidity(der: Uint8Array): string | undefined {
-  // UTCTime: 17 0D "YYMMDDHHMMSSZ". В TBS два таких значения: notBefore и notAfter.
-  // Берём последнее — это срок действия сертификата (notAfter).
+  // UTCTime: 17 0D "YYMMDDHHMMSSZ". TBS contains two of them: notBefore and notAfter.
+  // We take the last one — the certificate expiry (notAfter).
   let out: string | undefined;
   for (let i = 0; i < der.length - 15; i++) {
     if (der[i] === 0x17 && der[i + 1] === 0x0d) {

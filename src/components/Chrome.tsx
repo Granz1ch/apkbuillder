@@ -19,14 +19,14 @@ import { useStore } from '../store';
 import { Button, Modal, Input, Field, formatBytes } from './ui';
 
 export const NAV = [
-  { id: 'dashboard', label: 'Обзор', icon: LayoutDashboard, key: '1', group: 'Студия' },
-  { id: 'converter', label: 'Конвертер', icon: FileCode2, key: '2', group: 'Студия' },
-  { id: 'builder', label: 'Сборка APK', icon: Hammer, key: '3', group: 'Студия' },
-  { id: 'decompiler', label: 'Декомпилятор', icon: FileSearch, key: '4', group: 'Инструменты' },
-  { id: 'xapk', label: 'XAPK → APK', icon: PackageOpen, key: '5', group: 'Инструменты' },
-  { id: 'signing', label: 'Подпись', icon: KeyRound, key: '6', group: 'Инструменты' },
-  { id: 'errors', label: 'Ошибки', icon: AlertOctagon, key: '7', group: 'Справочник' },
-  { id: 'settings', label: 'Настройки', icon: Settings, key: '8', group: 'Справочник' },
+  { id: 'dashboard', label: 'Overview', icon: LayoutDashboard, key: '1', group: 'Studio' },
+  { id: 'converter', label: 'Converter', icon: FileCode2, key: '2', group: 'Studio' },
+  { id: 'builder', label: 'Build APK', icon: Hammer, key: '3', group: 'Studio' },
+  { id: 'decompiler', label: 'Decompiler', icon: FileSearch, key: '4', group: 'Tools' },
+  { id: 'xapk', label: 'XAPK → APK', icon: PackageOpen, key: '5', group: 'Tools' },
+  { id: 'signing', label: 'Signing', icon: KeyRound, key: '6', group: 'Tools' },
+  { id: 'errors', label: 'Errors', icon: AlertOctagon, key: '7', group: 'Reference' },
+  { id: 'settings', label: 'Settings', icon: Settings, key: '8', group: 'Reference' },
 ];
 
 export function Topbar() {
@@ -47,7 +47,7 @@ export function Topbar() {
         className="btn btn-ghost btn-icon"
         style={{ display: 'none' }}
         onClick={() => setSidebar(!sidebarOpen)}
-        aria-label="Меню"
+        aria-label="Menu"
       >
         <Menu size={18} />
       </button>
@@ -77,26 +77,26 @@ export function Topbar() {
           <span className="led" />
           ENGINE READY
         </div>
-        {errors > 0 && <span className="badge badge-err">{errors} ошибок</span>}
+        {errors > 0 && <span className="badge badge-err">{errors} errors</span>}
         <button
           className={`btn btn-sm ${consoleOpen ? '' : 'btn-ghost'}`}
           onClick={() => toggleConsole()}
-          title="Консоль ( ` )"
+          title="Console ( ` )"
         >
           <TerminalSquare size={14} />
-          <span className="hide-sm">Консоль</span>
+          <span className="hide-sm">Console</span>
         </button>
       </div>
 
       <Modal
         open={rename}
         onClose={() => setRename(false)}
-        title="Переименовать проект"
-        sub="Имя используется в заголовках и путях"
+        title="Rename project"
+        sub="The name is used in titles and paths"
         footer={
           <>
             <Button variant="ghost" onClick={() => setRename(false)}>
-              Отмена
+              Cancel
             </Button>
             <Button
               variant="primary"
@@ -105,12 +105,12 @@ export function Topbar() {
                 setRename(false);
               }}
             >
-              Сохранить
+              Save
             </Button>
           </>
         }
       >
-        <Field label="Название проекта">
+        <Field label="Project name">
           <Input value={name} onChange={(e) => setName(e.target.value)} autoFocus />
         </Field>
       </Modal>
@@ -119,11 +119,11 @@ export function Topbar() {
 }
 
 const FOLDERS = [
-  { prefix: 'src/', label: 'src', desc: 'исходники' },
-  { prefix: 'convertors/', label: 'convertors', desc: 'результаты' },
-  { prefix: 'decompilation/', label: 'decompilation', desc: 'декомпиляция' },
+  { prefix: 'src/', label: 'src', desc: 'sources' },
+  { prefix: 'convertors/', label: 'convertors', desc: 'results' },
+  { prefix: 'decompilation/', label: 'decompilation', desc: 'decompiled' },
   { prefix: 'xapkconvs/', label: 'xapkconvs', desc: 'XAPK' },
-  { prefix: 'build/', label: 'build', desc: 'сборки' },
+  { prefix: 'build/', label: 'build', desc: 'builds' },
 ];
 
 export function Sidebar() {
@@ -175,9 +175,9 @@ export function Sidebar() {
 
         <div className="tree">
           <div className="tree-head">
-            <span className="tree-title">Проект</span>
+            <span className="tree-title">Project</span>
             <span className="tree-title" style={{ letterSpacing: 0 }}>
-              {Object.keys(files).length} файлов
+              {Object.keys(files).length} files
             </span>
           </div>
           <div className="tree-list">

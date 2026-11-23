@@ -1,6 +1,6 @@
 /**
  * XAPK / APKS → APK.
- * Объединяет base.apk с split-модулями (dex, нативные библиотеки, assets).
+ * Merges base.apk with split modules (dex, native libraries, assets).
  */
 import { readZip, ZipWriter, ZipEntry } from './zip';
 import { ZipEntryInput } from './zip';
@@ -141,7 +141,7 @@ export async function convertXapk(
     try {
       inner = readZip(entry.data);
     } catch {
-      warnings.push(`Не удалось прочитать ${split.name}`);
+      warnings.push(`Failed to read ${split.name}`);
       continue;
     }
     let added = 0;
@@ -162,7 +162,7 @@ export async function convertXapk(
       added++;
     }
     if (split.hasResources) warnings.push('E-4004');
-    if (added > 0) merged.push(`${split.name} (${added} файл(ов)`);
+    if (added > 0) merged.push(`${split.name} (${added} file(s)`);
   }
 
   const zipBytes = out.build();

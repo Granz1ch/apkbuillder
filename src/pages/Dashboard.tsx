@@ -36,24 +36,24 @@ export function Dashboard() {
     {
       id: 'converter',
       icon: FileCode2,
-      title: 'Конвертер',
-      desc: 'HTML / CSS / JS / Python → APK с проверкой кода',
+      title: 'Converter',
+      desc: 'HTML / CSS / JS / Python → APK with code validation',
       tone: 'teal' as const,
       tag: '01',
     },
     {
       id: 'builder',
       icon: Hammer,
-      title: 'Сборка APK',
-      desc: 'PWA-ссылка или папка проекта → готовое приложение',
+      title: 'Build APK',
+      desc: 'A PWA link or a project folder → a ready application',
       tone: 'pink' as const,
       tag: '02',
     },
     {
       id: 'decompiler',
       icon: FileSearch,
-      title: 'Декомпилятор',
-      desc: 'Раскройте структуру любого APK: манифест, smali, ресурсы',
+      title: 'Decompiler',
+      desc: 'Open up any APK: manifest, smali and resources',
       tone: 'amber' as const,
       tag: '03',
     },
@@ -61,7 +61,7 @@ export function Dashboard() {
       id: 'xapk',
       icon: PackageOpen,
       title: 'XAPK → APK',
-      desc: 'Объединение split-модулей в один устанавливаемый APK',
+      desc: 'Merge split modules into one installable APK',
       tone: 'teal' as const,
       tag: '04',
     },
@@ -71,20 +71,20 @@ export function Dashboard() {
     <Page>
       <PageHead
         num="00"
-        eyebrow="Обзор"
+        eyebrow="Overview"
         title={
           <>
-            Студия сборки <em>Android-приложений</em>
+            An Android app <em>build studio</em>
           </>
         }
-        sub="Конвертер кода, декомпилятор, XAPK-конвертер и полноценный сборщик APK — всё в одном месте, прямо в браузере."
+        sub="Code converter, decompiler, XAPK converter and a full APK builder — all in one place, right in the browser."
         actions={
           <>
             <Button variant="ghost" icon={<ShieldCheck size={15} />} onClick={() => nav('signing')}>
-              Ключи подписи
+              Signing keys
             </Button>
             <Button variant="primary" icon={<Sparkles size={15} />} onClick={() => nav('converter')}>
-              Начать сборку
+              Start building
             </Button>
           </>
         }
@@ -96,14 +96,14 @@ export function Dashboard() {
             <div className="page-eyebrow" style={{ marginBottom: 10 }}>
               <span className="num">READY</span>
               <span className="sep" />
-              <span>движок активен</span>
+              <span>engine ready</span>
             </div>
             <h2>
-              Из идеи — в <em>установочный APK</em>
+              From an idea to an <em>installable APK</em>
             </h2>
             <p>
-              Собственный движок: бинарный манифест, DEX-байткод, ресурсы и подпись v2 генерируются локально,
-              без Android SDK и без отправки файлов в облако.
+              Own engine: the binary manifest, DEX bytecode, resources and the v2 signature are generated locally,
+              with no Android SDK and no cloud uploads.
             </p>
           </div>
           <div className="flex gap-8" style={{ flexWrap: 'wrap' }}>
@@ -126,46 +126,46 @@ export function Dashboard() {
       <div className="grid g-4 mt-16">
         <div className="kpi">
           <div className="kpi-label">
-            <Layers size={11} /> Сборок
+            <Layers size={11} /> Builds
           </div>
           <div className="kpi-value">
             {builds}
-            <span className="u">шт</span>
+            <span className="u">total</span>
           </div>
-          <div className="kpi-delta">{okBuilds} успешных</div>
+          <div className="kpi-delta">{okBuilds} succeeded</div>
         </div>
         <div className="kpi" style={{ '--kpi-glow': 'rgba(94,234,212,.2)' } as React.CSSProperties}>
           <div className="kpi-label">
-            <Zap size={11} /> APK в проекте
+            <Zap size={11} /> APKs in project
           </div>
           <div className="kpi-value">
             {apkCount}
-            <span className="u">файла</span>
+            <span className="u">files</span>
           </div>
-          <div className="kpi-delta">{last ? `${formatBytes(last.size)} — последний` : 'ещё нет'}</div>
+          <div className="kpi-delta">{last ? `${formatBytes(last.size)} — latest` : 'none yet'}</div>
         </div>
         <div className="kpi" style={{ '--kpi-glow': 'rgba(251,113,133,.16)' } as React.CSSProperties}>
           <div className="kpi-label">
-            <AlertCircle size={11} /> Ошибок в журнале
+            <AlertCircle size={11} /> Errors in log
           </div>
           <div className="kpi-value" style={{ color: errors ? 'var(--danger)' : undefined }}>
             {errors}
           </div>
-          <div className="kpi-delta">{logs.length} записей всего</div>
+          <div className="kpi-delta">{logs.length} entries total</div>
         </div>
         <div className="kpi" style={{ '--kpi-glow': 'rgba(244,114,182,.16)' } as React.CSSProperties}>
           <div className="kpi-label">
-            <KeyRound size={11} /> Ключей подписи
+            <KeyRound size={11} /> Signing keys
           </div>
           <div className="kpi-value">
             {keys.length}
           </div>
-          <div className="kpi-delta">{keys[0] ? keys[0].alias : 'создастся автоматически'}</div>
+          <div className="kpi-delta">{keys[0] ? keys[0].alias : 'created automatically'}</div>
         </div>
       </div>
 
       <div className="mt-24">
-        <div className="section-title">Модули</div>
+        <div className="section-title">Modules</div>
         <div className="grid g-2">
           {modules.map((m) => {
             const Icon = m.icon;
@@ -200,11 +200,11 @@ export function Dashboard() {
         <Card>
           <CardHead
             icon={<Activity size={16} />}
-            title="Последние операции"
-            sub="История сборок и конвертаций"
+            title="Recent operations"
+            sub="Build and conversion history"
             right={
               <Button variant="ghost" size="sm" icon={<ArrowRight size={13} />} onClick={() => nav('builder')}>
-                Все
+                View all
               </Button>
             }
           />
@@ -213,8 +213,8 @@ export function Dashboard() {
               <div className="ico">
                 <Activity size={18} />
               </div>
-              <div className="t">Пока пусто</div>
-              <div className="s">Соберите первый APK — он появится здесь</div>
+              <div className="t">Nothing here yet</div>
+              <div className="s">Build your first APK and it will show up here</div>
             </div>
           ) : (
             <div className="rows" style={{ padding: 8 }}>
@@ -230,7 +230,7 @@ export function Dashboard() {
                       {h.errorId ? ` · ${h.errorId}` : ''}
                     </div>
                   </div>
-                  <Badge tone={h.ok ? 'ok' : 'err'}>{h.ok ? 'готово' : 'ошибка'}</Badge>
+                  <Badge tone={h.ok ? 'ok' : 'err'}>{h.ok ? 'done' : 'failed'}</Badge>
                 </div>
               ))}
             </div>
@@ -238,23 +238,23 @@ export function Dashboard() {
         </Card>
 
         <Card>
-          <CardHead icon={<Cpu size={16} />} title="Состояние движка" sub="Компоненты проверяются локально" />
+          <CardHead icon={<Cpu size={16} />} title="Engine status" sub="Components are checked locally" />
           <div style={{ padding: 18 }} className="col gap-12">
             {[
               { k: 'WebCrypto / RSA-2048', ok: !!crypto?.subtle },
-              { k: 'Генератор DEX-байткода', ok: true },
-              { k: 'Бинарный AXML + ARSC', ok: true },
+              { k: 'DEX bytecode generator', ok: true },
+              { k: 'Binary AXML + ARSC', ok: true },
               { k: 'APK Signature Scheme v2', ok: true },
-              { k: 'IndexedDB-хранилище', ok: true },
+              { k: 'IndexedDB storage', ok: true },
             ].map((s) => (
               <div className="flex between" key={s.k} style={{ fontSize: 12.5 }}>
                 <span className="muted">{s.k}</span>
                 {s.ok ? (
                   <span className="badge badge-ok">
-                    <CheckCircle2 size={11} /> ок
+                    <CheckCircle2 size={11} /> ok
                   </span>
                 ) : (
-                  <span className="badge badge-err">нет</span>
+                  <span className="badge badge-err">no</span>
                 )}
               </div>
             ))}

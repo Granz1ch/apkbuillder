@@ -1,5 +1,5 @@
 /**
- * Оркестратор сборки APK: манифест + ресурсы + DEX + ZIP + подпись.
+ * APK build orchestrator: manifest + resources + DEX + ZIP + signature.
  */
 import { buildManifest, AxmlNode } from './axml';
 import { buildResources } from './arsc';
@@ -20,7 +20,7 @@ export interface ApkBuildOptions {
   versionCode?: number;
   minSdk?: number;
   targetSdk?: number;
-  /** внешний URL (PWA) или file:///android_asset/app/index.html */
+  /** external URL (PWA) or file:///android_asset/app/index.html */
   startUrl?: string;
   assets?: ApkAsset[];
   permissions?: string[];
@@ -33,7 +33,7 @@ export interface ApkBuildOptions {
     certificate: Uint8Array;
     publicKeyDer: Uint8Array;
   };
-  /** подписывать ли APK (по умолчанию да) */
+  /** whether to sign the APK (default true) */
   sign?: boolean;
 }
 
@@ -67,13 +67,13 @@ export function isValidPackage(name: string): boolean {
 }
 
 /**
- * Собирает установочный APK.
+ * Builds an installable APK.
  */
 export async function buildApk(opts: ApkBuildOptions): Promise<ApkBuildResult> {
   const warnings: string[] = [];
   const packageName = sanitizePackage(opts.packageName || DEFAULT_PACKAGE);
   if (!isValidPackage(packageName)) {
-    throw new Error(`Некорректное имя пакета: ${opts.packageName}`);
+    throw new Error(`Invalid package name: ${opts.packageName}`);
   }
   const appName = (opts.appName || 'APK Builder App').slice(0, 80);
   const versionName = opts.versionName || '1.0';
@@ -84,7 +84,7 @@ export async function buildApk(opts: ApkBuildOptions): Promise<ApkBuildResult> {
   const permissions = new Set<string>(['android.permission.INTERNET']);
   for (const p of opts.permissions ?? []) permissions.add(p);
 
-  // ---------- ресурсы ----------
+  // ---------- resources ----------
   const resources: { type: 'string' | 'drawable'; entries: { key: string; value: string }[] }[] = [
     { type: 'string', entries: [{ key: 'app_name', value: appName }] },
   ];
@@ -93,7 +93,7 @@ export async function buildApk(opts: ApkBuildOptions): Promise<ApkBuildResult> {
   }
   const arsc = buildResources(packageName, resources);
 
-  // ---------- манифест ----------
+  // ---------- manifest ----------
   const appAttrs: Record<string, any> = {
     'android:label': { ref: arsc.ids['string/app_name'] },
     'android:allowBackup': true,
@@ -174,7 +174,7 @@ export async function buildApk(opts: ApkBuildOptions): Promise<ApkBuildResult> {
   for (const a of opts.assets ?? []) {
     const p = a.path.replace(/^\/+/, '');
     if (seen.has(p)) {
-      warnings.push(`Дубликат файла пропущен: ${p}`);
+      warnings.push(`Duplicate file skipped: ${p}`);
       continue;
     }
     seen.add(p);
@@ -182,7 +182,7 @@ export async function buildApk(opts: ApkBuildOptions): Promise<ApkBuildResult> {
   }
   const zipBytes = zip.build();
 
-  // ---------- подпись ----------
+  // ---------- signature ----------
   let bytes = zipBytes;
   let digest: Uint8Array | null = null;
   if (opts.sign !== false && opts.keystore) {
@@ -190,7 +190,7 @@ export async function buildApk(opts: ApkBuildOptions): Promise<ApkBuildResult> {
     bytes = signed.bytes;
     digest = signed.digest;
   } else if (opts.sign !== false) {
-    warnings.push('APK не подписан: не выбран ключ');
+    warnings.push('APK is not signed: no key selected');
   }
 
   return {
@@ -209,19 +209,19 @@ export async function buildApk(opts: ApkBuildOptions): Promise<ApkBuildResult> {
   };
 }
 
-/** Собирает HTML-проект из одного файла. */
+/** Builds an HTML project from a single file. */
 export function htmlProjectAssets(html: string): ApkAsset[] {
   return [{ path: 'assets/app/index.html', data: new TextEncoder().encode(html) }];
 }
 
-/** Превращает плоский список файлов проекта (с относительными путями) в assets. */
+/** Turns a flat list of project files (with relative paths) into assets. */
 export function folderProjectAssets(files: { path: string; data: Uint8Array }[]): ApkAsset[] {
   return files
     .filter((f) => !f.path.startsWith('..') && !f.path.startsWith('/'))
     .map((f) => ({ path: `assets/app/${f.path.replace(/^\.?\//, '')}`, data: f.data }));
 }
 
-/** Генерирует простой HTML-файл для PWA-сборки. */
+/** Generates a simple HTML file for a PWA build. */
 export function pwaShellHtml(opts: { url: string; title: string; color?: string }): string {
   const color = opts.color ?? '#0b0d12';
   return `<!doctype html>

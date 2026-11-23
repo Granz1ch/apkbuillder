@@ -1,8 +1,8 @@
 {
-  "name": "APK Builder — студия сборки Android-приложений",
+  "name": "APK Builder — Android app build studio",
   "short_name": "APK Builder",
-  "description": "Конвертер кода в APK, декомпилятор, XAPK → APK и сборщик Android-приложений. Всё локально, без Android SDK.",
-  "lang": "ru",
+  "description": "Code converter to APK, decompiler, XAPK → APK and Android app builder. Everything runs locally, without the Android SDK.",
+  "lang": "en",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

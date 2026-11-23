@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Полная проверка APK Signature Scheme v2 (как делает apksig):
-структура блока, content digest, RSA-подпись и сертификат."""
+"""Full APK Signature Scheme v2 verification (like apksig does):
+block structure, content digest, RSA signature and certificate."""
 import sys, hashlib, io, struct, zlib
 from cryptography import x509
 from cryptography.hazmat.primitives import hashes, serialization

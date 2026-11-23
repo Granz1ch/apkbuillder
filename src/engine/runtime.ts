@@ -1,6 +1,6 @@
 /**
- * Шаблон Activity-обёртки: WebView, который загружает приложение из assets.
- * Класс один и тот же для всех собираемых APK.
+ * Activity wrapper template: a WebView that loads the app from assets.
+ * The same class is used for every APK we build.
  */
 import { DexBuilder, DexClass, ACC } from './dex';
 
@@ -8,7 +8,7 @@ export const RUNTIME_PACKAGE = 'com.apkbuilder.runtime';
 export const RUNTIME_ACTIVITY = 'com.apkbuilder.runtime.WebAppActivity';
 
 export interface RuntimeDexOptions {
-  /** URL, который откроет WebView */
+  /** The URL the WebView will open */
   url: string;
 }
 

@@ -1,5 +1,5 @@
 /**
- * Декомпиляция APK: манифест, ресурсы, dex → smali, все файлы.
+ * APK decompilation: manifest, resources, dex → smali, all files.
  */
 import { readZip, ZipEntry } from '../zip';
 import { parseAxml, axmlToXml, AxmlNode } from './axml';
@@ -36,7 +36,7 @@ export interface DecompileResult {
   warnings: string[];
 }
 
-/* ----------------------- ресурсы (минимум) ----------------------- */
+/* ----------------------- resources (minimal) ----------------------- */
 
 function readPool(buf: Uint8Array, off: number): string[] {
   const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
@@ -70,14 +70,14 @@ function readPool(buf: Uint8Array, off: number): string[] {
   return out;
 }
 
-/** Возвращает карту resId (0x7f010000) → строковое значение. */
+/** Returns a map of resId (0x7f010000) → string value. */
 export function readResourceStrings(arsc: Uint8Array): Map<number, string> {
   const map = new Map<number, string>();
   const dv = new DataView(arsc.buffer, arsc.byteOffset, arsc.byteLength);
   if (dv.getUint16(0, true) !== 0x0002) return map;
   const globalPool = readPool(arsc, 12);
   const pkgOff = 12 + dv.getUint32(12 + 4, true);
-  // идём по чанкам внутри пакета
+  // walk the chunks inside the package
   let p = 12;
   const end = arsc.byteLength;
   while (p + 8 <= end) {
@@ -125,7 +125,7 @@ export function readResourceStrings(arsc: Uint8Array): Map<number, string> {
   return map;
 }
 
-/* ----------------------- основная логика ----------------------- */
+/* ----------------------- main logic ----------------------- */
 
 export function decompileApk(bytes: Uint8Array): DecompileResult {
   const warnings: string[] = [];
@@ -181,12 +181,12 @@ export function decompileApk(bytes: Uint8Array): DecompileResult {
         files.push({ path: `smali/${safe}.smali`, data: new TextEncoder().encode(classToSmali(c)) });
       }
     } catch (e) {
-      warnings.push(`Не удалось разобрать ${d.name}: ${e instanceof Error ? e.message : String(e)}`);
+      warnings.push(`Failed to parse ${d.name}: ${e instanceof Error ? e.message : String(e)}`);
     }
   }
   if (dexEntries.length === 0) warnings.push('E-3003');
 
-  // остальные файлы
+  // remaining files
   for (const e of entries) {
     if (e.name === 'AndroidManifest.xml' || e.name === 'resources.arsc' || /^classes\d*\.dex$/.test(e.name)) continue;
     if (e.name.startsWith('META-INF/')) {
@@ -196,7 +196,7 @@ export function decompileApk(bytes: Uint8Array): DecompileResult {
     files.push({ path: e.name, data: e.data });
   }
 
-  // манифест
+  // manifest
   files.push({ path: 'AndroidManifest.xml', data: new TextEncoder().encode(manifestXml) });
   if (byName.has('resources.arsc')) {
     files.push({ path: 'resources.arsc.original', data: byName.get('resources.arsc')!.data });
@@ -234,29 +234,29 @@ function findNode(root: AxmlNode | undefined, name: string): AxmlNode | undefine
 }
 
 export function makeReadme(r: DecompileReport): string {
-  return `# Декомпиляция: ${r.appName}
+  return `# Decompilation: ${r.appName}
 
-| Параметр | Значение |
+| Property | Value |
 |---|---|
-| Пакет | \`${r.package}\` |
-| Версия | ${r.versionName} (${r.versionCode}) |
+| Package | \`${r.package}\` |
+| Version | ${r.versionName} (${r.versionCode}) |
 | minSdk / targetSdk | ${r.minSdk} / ${r.targetSdk} |
 | Activities | ${r.activities.length} |
-| Классов | ${r.classes} |
-| Методов | ${r.methods} |
-| DEX-файлов | ${r.dexFiles} |
-| Файлов в APK | ${r.files} |
-| Размер APK | ${(r.size / 1024).toFixed(1)} КБ |
+| Classes | ${r.classes} |
+| Methods | ${r.methods} |
+| DEX files | ${r.dexFiles} |
+| Files in APK | ${r.files} |
+| APK size | ${(r.size / 1024).toFixed(1)} KB |
 
 ## Permissions
-${r.permissions.map((p) => `- \`${p}\``).join('\n') || '— нет —'}
+${r.permissions.map((p) => `- \`${p}\``).join('\n') || '— none —'}
 
 ## Activities
-${r.activities.map((a) => `- \`${a}\``).join('\n') || '— нет —'}
+${r.activities.map((a) => `- \`${a}\``).join('\n') || '— none —'}
 
-## Структура
-- \`AndroidManifest.xml\` — декодированный манифест
-- \`smali/\` — дизассемблированный байткод (по одному файлу на класс)
-- остальные файлы APK — в исходном виде
+## Structure
+- \`AndroidManifest.xml\` — decoded manifest
+- \`smali/\` — disassembled bytecode (one file per class)
+- the remaining APK files — as is
 `;
 }

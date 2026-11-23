@@ -48,8 +48,8 @@ function AndroidNotice() {
     >
       <Smartphone size={13} style={{ color: 'var(--info)', flex: 'none' }} />
       <span style={{ flex: 1 }}>
-        Android-сборка: WebView не отдаёт файлы наружу — результат хранится в проекте. Для экспорта APK
-        используйте десктоп-версию.
+        Android build: WebView cannot export files — the result stays inside the project. To export APKs
+        use the desktop version.
       </span>
       <button
         className="btn btn-ghost btn-icon"
@@ -62,7 +62,7 @@ function AndroidNotice() {
             /* ignore */
           }
         }}
-        title="Скрыть"
+        title="Hide"
       >
         <X size={12} />
       </button>

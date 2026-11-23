@@ -1,6 +1,6 @@
 /**
- * Генератор DEX-файлов (Dalvik Executable) — чистая реализация без Android SDK.
- * Собирает байткод вручную; формат: https://source.android.com/docs/core/runtime/dex-format
+ * DEX (Dalvik Executable) file generator — a pure implementation without the Android SDK.
+ * Assembles bytecode by hand; format: https://source.android.com/docs/core/runtime/dex-format
  */
 import { ByteWriter, adler32, cmpStr, enc } from './bytes';
 
@@ -37,7 +37,7 @@ export const ACC = {
   CONSTRUCTOR: 0x10000,
 } as const;
 
-/* ----------------------- модель ----------------------- */
+/* ----------------------- model ----------------------- */
 
 export type Proto = { ret: string; params: string[] };
 export type MethodRef = { cls: string; name: string; proto: Proto };
@@ -71,7 +71,7 @@ export interface DexClass {
   virtualMethods?: DexMethod[];
 }
 
-/* ----------------------- сборщик ----------------------- */
+/* ----------------------- builder ----------------------- */
 
 export class DexBuilder {
   private strings = new Map<string, number>();
@@ -89,7 +89,7 @@ export class DexBuilder {
     return this;
   }
 
-  /* --- таблицы символов --- */
+  /* --- symbol tables --- */
 
   private str(s: string): number {
     let i = this.strings.get(s);
@@ -200,7 +200,7 @@ export class DexBuilder {
   build(): Uint8Array {
     this.collect();
 
-    /* ---------- сортировка ---------- */
+    /* ---------- sorting ---------- */
     const stringList = [...this.strings.keys()].sort(cmpStr);
     const stringIndex = new Map<string, number>();
     stringList.forEach((s, i) => stringIndex.set(s, i));
@@ -262,7 +262,7 @@ export class DexBuilder {
     const fldIdx = (f: FieldRef) => fieldIndex.get(this.fieldIdx.get(`${f.cls}|${f.name}|${f.type}`)!)!;
     const mthIdx = (m: MethodRef) => methodIndex.get(this.methodIdx.get(`${m.cls}|${m.name}|${JSON.stringify(m.proto)}`)!)!;
 
-    /* ---------- кодирование инструкций ---------- */
+    /* ---------- instruction encoding ---------- */
     const encodeIns = (ins: Ins): number[] => {
       switch (ins.op) {
         case 0x0e:
@@ -293,7 +293,7 @@ export class DexBuilder {
       }
     };
 
-    /* ---------- code_items (сначала — их смещения не зависят от class_data) ---------- */
+    /* ---------- code_items (first — their offsets do not depend on class_data) ---------- */
     const codeBytes = new Map<DexMethod, Uint8Array>();
     for (const c of this.classes) {
       for (const m of [...(c.directMethods ?? []), ...(c.virtualMethods ?? [])]) {
@@ -345,7 +345,7 @@ export class DexBuilder {
       typeListSize += b.length;
     }
 
-    /* ---------- планировка ---------- */
+    /* ---------- layout ---------- */
     const headerSize = 112;
     const align4 = (n: number) => (n + 3) & ~3;
 
@@ -383,7 +383,7 @@ export class DexBuilder {
       }
     }
 
-    /* ---------- class_data (теперь известны code_off) ---------- */
+    /* ---------- class_data (code_off is known now) ---------- */
     const classDataBytes = new Map<DexClass, Uint8Array>();
     for (const c of this.classes) {
       const sf = c.staticFields ?? [];
@@ -439,7 +439,7 @@ export class DexBuilder {
     const mapItems: [number, number, number][] = [];
     const fileSize = cursor + 4 + 12 * 12;
 
-    /* ---------- запись ---------- */
+    /* ---------- writing ---------- */
     const body = new ByteWriter(fileSize + 64);
     body.bytes(enc.encode('dex\n035\0'));
     body.u32(0);
@@ -464,7 +464,7 @@ export class DexBuilder {
     body.u32(classDefsOff);
     body.u32(fileSize - dataStart);
     body.u32(dataStart);
-    if (body.offset !== headerSize) throw new Error(`DEX: заголовок ${body.offset} != 112`);
+    if (body.offset !== headerSize) throw new Error(`DEX: header ${body.offset} != 112`);
 
     for (let i = 0; i < stringList.length; i++) body.u32(stringDataStart + stringDataRel[i]);
     for (const t of typeList) body.u32(strIdx(t));
@@ -545,7 +545,7 @@ export class DexBuilder {
     }
 
     const result = body.slice();
-    if (result.length !== fileSize) throw new Error(`DEX: размер ${result.length} != ${fileSize}`);
+    if (result.length !== fileSize) throw new Error(`DEX: size ${result.length} != ${fileSize}`);
     const sig = sha1(result.subarray(32));
     result.set(sig, 12);
     new DataView(result.buffer).setUint32(8, adler32(result.subarray(12)), true);

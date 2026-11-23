@@ -185,7 +185,7 @@ export function CodeEditor({
                   const dom = document.createElement('div');
                   dom.className = 'err-tip';
                   dom.innerHTML = `
-                    <div class="id">${issue.id} · ${issue.severity === 'error' ? 'ошибка' : issue.severity === 'warning' ? 'предупреждение' : 'подсказка'}</div>
+                    <div class="id">${issue.id} · ${issue.severity === 'error' ? 'error' : issue.severity === 'warning' ? 'warning' : 'hint'}</div>
                     <div class="msg"></div>
                     ${issue.hint ? '<div class="hint"></div>' : ''}
                   `;
@@ -212,7 +212,7 @@ export function CodeEditor({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
-  // синхронизация текста
+  // text sync
   useEffect(() => {
     const v = view.current;
     if (!v) return;
@@ -222,7 +222,7 @@ export function CodeEditor({
     }
   }, [value]);
 
-  // подсветка ошибок
+  // issue highlighting
   useEffect(() => {
     const v = view.current;
     if (!v) return;

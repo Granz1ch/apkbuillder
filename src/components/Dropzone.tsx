@@ -67,8 +67,8 @@ export function Dropzone({
           <div className="ico">
             <UploadCloud />
           </div>
-          <div className="t">{title ?? 'Перетащите файлы сюда'}</div>
-          <div className="s">{sub ?? 'или нажмите, чтобы выбрать'}</div>
+          <div className="t">{title ?? 'Drop files here'}</div>
+          <div className="s">{sub ?? 'or click to browse'}</div>
         </>
       )}
     </div>
