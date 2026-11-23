@@ -1,0 +1,10 @@
+node_modules/
+dist/
+release/
+out/
+*.tsbuildinfo
+.DS_Store
+*.log
+.vite/
+
+desktop/assets.ts
