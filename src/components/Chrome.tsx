@@ -184,9 +184,7 @@ export function Sidebar() {
             {counts.map((f) => (
               <div className="tree-row" key={f.prefix}>
                 <FolderTree />
-                <span className="dir-name" style={{ fontFamily: 'var(--mono)', fontSize: 11 }}>
-                  {f.label}
-                </span>
+                <span className="dir-name">{f.label}</span>
                 <span className="sz">{f.count ? `${f.count} · ${formatBytes(f.size)}` : '—'}</span>
               </div>
             ))}
