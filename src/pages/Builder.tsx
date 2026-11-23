@@ -93,7 +93,7 @@ export function Builder() {
       return;
     }
     if (mode === 'pwa' && !validUrl) {
-      toast('err', 'Некорректный URL', 'Адрес должен начинаться с http:// или https://', );
+      toast('err', 'Некорректный URL', 'Адрес должен начинаться с http:// или https://');
       log('err', `Некорректный URL: ${cfg.url}`, 'E-1014');
       return;
     }
@@ -170,11 +170,6 @@ export function Builder() {
     setFolderName(rel ? rel.split('/')[0] : 'проект');
     setFolderFiles(list);
     setMode('folder');
-    const idx = list.find((f) => f.path.endsWith('index.html'));
-    if (idx) {
-      const name = idx.path.split('/').pop() ?? 'index.html';
-      setCfg((c) => ({ ...c, appName: c.appName || name.replace('.html', '') }));
-    }
     log('ok', `Загружена папка: ${list.length} файлов, ${formatBytes(list.reduce((a, f) => a + f.data.length, 0))}`);
   };
 

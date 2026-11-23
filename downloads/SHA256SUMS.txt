@@ -1,2 +1,2 @@
-004221af6c952d4afecd6899e032772e9b399d816919b6f06806889b0d1f0b3f  release/APK-Builder-1.0.0.exe
-0becbe3b13425f7aece0e6505adfe333bc4162dea6f8a2d253b99e4c87008b02  release/APK-Builder-1.0.0.apk
+6ec0c2f729f6eccfba31485e3bc73d80f590f19fc7bbb64b1513913c672080f3  downloads/APK-Builder-1.0.0-windows-x64.zip
+9126eb04c38db7a951eccc625a98de1a407654d084ea86977878504cedec39d2  downloads/APK-Builder-1.0.0.apk

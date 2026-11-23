@@ -170,6 +170,7 @@ export function Converter() {
   }, [text, activeFile, settings.autoValidate, runValidation]);
 
   const hasIndex = srcFiles.some((f) => f.endsWith('index.html'));
+  const pyFiles = srcFiles.filter((f) => f.endsWith('.py'));
 
   /* ---------------- сборка ---------------- */
   const doBuild = async () => {
@@ -699,6 +700,20 @@ export function Converter() {
               <Button variant="primary" size="lg" block icon={<Play size={16} />} onClick={doBuild} disabled={build.running}>
                 {build.running ? 'Сборка…' : 'Собрать APK'}
               </Button>
+
+              {pyFiles.length > 0 && (
+                <div
+                  className="flex gap-8"
+                  style={{ fontSize: 11, lineHeight: 1.55, color: 'var(--text-3)', padding: '9px 11px', borderRadius: 10, background: 'rgba(96,165,250,.07)', border: '1px solid rgba(96,165,250,.16)' }}
+                >
+                  <Info size={13} style={{ color: 'var(--info)', flex: 'none', marginTop: 1 }} />
+                  <span>
+                    {pyFiles.length === 1 ? `Файл ${pyFiles[0].replace('src/', '')} — Python.` : `${pyFiles.length} Python-файлов.`}{' '}
+                    Они добавляются в APK как ассеты (<span className="mono">assets/app/*.py</span>). Для запуска Python на
+                    устройстве нужен отдельный runtime — офлайн-движок его не содержит.
+                  </span>
+                </div>
+              )}
 
               <div className="flex gap-8" style={{ fontSize: 11, color: 'var(--text-4)' }}>
                 <ShieldCheck size={12} />
