@@ -1,0 +1,2 @@
+004221af6c952d4afecd6899e032772e9b399d816919b6f06806889b0d1f0b3f  release/APK-Builder-1.0.0.exe
+0becbe3b13425f7aece0e6505adfe333bc4162dea6f8a2d253b99e4c87008b02  release/APK-Builder-1.0.0.apk
