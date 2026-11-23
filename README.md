@@ -4,53 +4,53 @@
 
 # APK Builder
 
-### Студия сборки Android-приложений — в браузере и на десктопе
+### An Android app build studio — in the browser and on the desktop
 
-Конвертер кода в APK · Декомпилятор · XAPK → APK · Сборщик APK · Подпись v2
+Code → APK converter · Decompiler · XAPK → APK · APK builder · v2 signing
 
-**Без Android SDK. Без Java. Без Gradle. Без интернета.** Весь движок написан на TypeScript и работает локально.
+**No Android SDK. No Java. No Gradle. No internet.** The whole engine is written in TypeScript and runs locally.
 
-[Скачать релиз](https://github.com/Granz1ch/apkbuillder/releases/latest) · [Возможности](#-возможности) · [Быстрый старт](#-быстрый-старт) · [Как устроен движок](#-как-устроен-движок) · [Каталог ошибок](#-каталог-ошибок)
+[Download a release](https://github.com/Granz1ch/apkbuillder/releases/latest) · [Features](#-features) · [Quick start](#-quick-start) · [How the engine works](#-how-the-engine-works) · [Error catalog](#-error-catalog)
 
 </div>
 
 ---
 
-## ✨ Возможности
+## ✨ Features
 
-| Модуль | Что делает |
+| Module | What it does |
 | --- | --- |
-| **01 · Конвертер** | Вставляете HTML / CSS / JS / Python — код проверяется, ошибки подчёркиваются в редакторе, каждая получает **идентификатор, причину и способ исправления**. Если ошибок нет — собирается установочный `.apk` в `convertors/`. |
-| **02 · Сборка APK** | Два режима: **PWA** (обёртка WebView вокруг сайта) и **папка проекта** (перетащили папку — получили APK со всеми файлами внутри). |
-| **03 · Декомпилятор** | Любой APK разбирается на: бинарный `AndroidManifest.xml` → читаемый XML, `classes.dex` → smali-листинг, все ресурсы и ассеты. Результат — в `decompilation/<имя>/`. |
-| **04 · XAPK → APK** | Split-архивы `.xapk` / `.apks`: анализ модулей, слияние `classes2..N.dex`, `lib/*`, `assets/*` в один APK и подпись вашим ключом. Результат — в `xapkconvs/`. |
-| **05 · Подпись** | Создание RSA-2048 ключей, самоподписанный X.509, подпись APK по **APK Signature Scheme v2**, проверка чужой подписи и сертификата. |
-| **06 · Справочник ошибок** | 36 ошибок с кодами `E-1001…E-6003`, поиском по коду, названию и описанию. |
-| **07 · Настройки** | Параметры движка, экспорт/импорт проекта в ZIP, очистка, горячие клавиши. |
+| **01 · Converter** | Paste HTML / CSS / JS / Python — the code is validated, errors are underlined in the editor, and every one of them gets an **identifier, a cause and a way to fix it**. When there are no errors, an installable `.apk` is built into `convertors/`. |
+| **02 · Build APK** | Two modes: **PWA** (a WebView wrapper around a site) and **project folder** (drop a folder, get an APK with all files inside). |
+| **03 · Decompiler** | Any APK is broken down into: binary `AndroidManifest.xml` → readable XML, `classes.dex` → smali listing, all resources and assets. The result lands in `decompilation/<name>/`. |
+| **04 · XAPK → APK** | Split archives `.xapk` / `.apks`: module analysis, merging of `classes2..N.dex`, `lib/*`, `assets/*` into one APK and signing with your key. The result lands in `xapkconvs/`. |
+| **05 · Signing** | RSA-2048 key generation, self-signed X.509, APK signing with **APK Signature Scheme v2**, verification of third-party signatures and certificates. |
+| **06 · Error reference** | 36 errors with codes `E-1001…E-6003`, searchable by code, title and description. |
+| **07 · Settings** | Engine parameters, project export/import as ZIP, cleanup, keyboard shortcuts. |
 
-Плюс: живой журнал (консоль), история операций, тосты, тёмная тема «build lab», адаптив под мобильные, PWA-манифест, горячие клавиши `Alt+1…8`.
+Plus: live build log, operation history, toasts, a dark "build lab" theme, mobile-friendly layout, PWA manifest, `Alt+1…8` shortcuts.
 
 ---
 
-## 📦 Скачать
+## 📦 Download
 
-Готовые сборки — в папке [`downloads/`](downloads) и в [**GitHub Releases**](https://github.com/Granz1ch/apkbuillder/releases/latest).
+Ready builds live in the [`downloads/`](downloads) folder and in [**GitHub Releases**](https://github.com/Granz1ch/apkbuillder/releases/latest).
 
-| Файл | Платформа | Размер | Описание |
+| File | Platform | Size | Description |
 | --- | --- | --- | --- |
-| [`APK-Builder-1.0.0-windows-x64.zip`](downloads/APK-Builder-1.0.0-windows-x64.zip) | Windows x64 | ~55 МБ | **Портативная** сборка: распаковать и запустить `APK-Builder-1.0.0.exe`. Установка не нужна — все зависимости внутри. |
-| [`APK-Builder-1.0.0.apk`](downloads/APK-Builder-1.0.0.apk) | Android 7.0+ (API 24+) | ~1 МБ | Та же студия в виде APK: работает офлайн, подписана схемой v2. |
-| [`SHA256SUMS.txt`](downloads/SHA256SUMS.txt) | — | — | Контрольные суммы для проверки целостности. |
+| [`APK-Builder-1.1.0-windows-x64.zip`](downloads/APK-Builder-1.1.0-windows-x64.zip) | Windows x64 | ~55 MB | **Portable** build: unpack and run `APK-Builder-1.1.0.exe`. No installation needed — every dependency is inside. |
+| [`APK-Builder-1.1.0.apk`](downloads/APK-Builder-1.1.0.apk) | Android 7.0+ (API 24+) | ~1 MB | The same studio as an APK: works offline, signed with the v2 scheme. |
+| [`SHA256SUMS.txt`](downloads/SHA256SUMS.txt) | — | — | Checksums for integrity verification. |
 
-> **Про установщик.** В среде сборки была недоступна загрузка бинарников Electron/NSIS с GitHub, поэтому Windows-версия собрана как **один самодостаточный .exe** (Bun runtime + встроенная веб-сборка). Это и есть «все зависимости внутри»: не нужен ни установщик, ни Node.js, ни интернет.
+> **About the installer.** Electron/NSIS binaries could not be downloaded in the build environment, so the Windows version is shipped as **one self-contained .exe** (Bun runtime + embedded web build). That is exactly "all dependencies included": no installer, no Node.js and no internet required.
 
-> **Про GitHub Releases.** Из этой среды `uploads.github.com` закрыт, поэтому вложения к релизу загрузить нельзя — файлы лежат прямо в репозитории в папке `downloads/` и отдаются через кнопку **Raw / Download**.
+> **About GitHub Releases.** `uploads.github.com` is blocked from this environment, so binary assets cannot be attached to a release — the files live right in the repository under `downloads/` and are served via the **Raw / Download** button.
 
 ---
 
-## 🚀 Быстрый старт
+## 🚀 Quick start
 
-### Из исходников
+### From source
 
 ```bash
 git clone https://github.com/Granz1ch/apkbuillder.git
@@ -59,57 +59,57 @@ npm install
 npm run dev          # http://localhost:5173
 ```
 
-### Сборка
+### Building
 
 ```bash
-npm run build        # веб-сборка в dist/
-npm run apk:self     # APK студии → release/ и public/apk-builder.apk
-npm run release      # всё сразу: web + apk + windows exe
+npm run build        # web build into dist/
+npm run apk:self     # studio APK → release/ and public/apk-builder.apk
+npm run release      # everything at once: web + apk + windows exe
 ```
 
-### Проверка движка
+### Verifying the engine
 
 ```bash
-npm run engine:test          # собирает test.apk и проверяет подпись
-python3 tools/verify-signature.py release/APK-Builder-1.0.0.apk
+npm run engine:test          # builds test.apk and checks the signature
+python3 tools/verify-signature.py release/APK-Builder-1.1.0.apk
 ```
 
-Скрипт `verify-signature.py` делает то же, что `apksigner verify`: разбирает APK Signing Block, пересчитывает content digest по 1 МБ чанкам, проверяет RSA-подпись и сверяет открытый ключ с сертификатом.
+The `verify-signature.py` script does the same job as `apksigner verify`: it parses the APK Signing Block, recomputes the content digest over 1 MB chunks, verifies the RSA signature and matches the public key against the certificate.
 
 ---
 
-## 🧠 Как устроен движок
+## 🧠 How the engine works
 
-Всё, что обычно делает Android SDK, здесь написано руками:
+Everything the Android SDK normally does is written by hand here:
 
 ```
 src/engine/
-├── bytes.ts        запись/чтение LE, uleb128, CRC32, adler32, base64
-├── zip.ts          ZIP-писатель (store/deflate, выравнивание) и читатель
-├── axml.ts         бинарный AndroidManifest.xml (string pool + chunks)
-├── arsc.ts         таблица ресурсов resources.arsc
-├── dex.ts          генератор DEX: классы, методы, поля, code_item, map_list
-├── runtime.ts      Activity-обёртка WebView (DEX) для собираемых приложений
-├── apk.ts          оркестратор: манифест + ресурсы + DEX + ZIP + подпись
-├── sign.ts         APK Signature Scheme v2 + разбор подписи
-├── cert.ts         RSA-2048 + самоподписанный X.509 (WebCrypto)
-├── keyring.ts      хранилище ключей
-├── icon.ts         PNG-иконки
-├── validate.ts     Lezer-парсеры HTML/CSS/JS/Python → список проблем
-├── xapk.ts         анализ и слияние split-архивов
-├── errors.ts       каталог ошибок E-1001…E-6003
-└── decompile/      AXML→XML, DEX→smali, оркестратор декомпиляции
+├── bytes.ts        LE read/write, uleb128, CRC32, adler32, base64
+├── zip.ts          ZIP writer (store/deflate, alignment) and reader
+├── axml.ts         binary AndroidManifest.xml (string pool + chunks)
+├── arsc.ts         resources.arsc resource table
+├── dex.ts          DEX generator: classes, methods, fields, code_item, map_list
+├── runtime.ts      WebView Activity wrapper (DEX) for the apps we build
+├── apk.ts          orchestrator: manifest + resources + DEX + ZIP + signature
+├── sign.ts         APK Signature Scheme v2 + signature inspection
+├── cert.ts         RSA-2048 + self-signed X.509 (WebCrypto)
+├── keyring.ts      key storage
+├── icon.ts         PNG icons
+├── validate.ts     Lezer parsers for HTML/CSS/JS/Python → issue list
+├── xapk.ts         split archive analysis and merging
+├── errors.ts       error catalog E-1001…E-6003
+└── decompile/      AXML→XML, DEX→smali, decompilation orchestrator
 ```
 
-**Что генерируется при сборке APK:**
+**What is generated when an APK is built:**
 
-1. `AndroidManifest.xml` — бинарный AXML: string pool, resource map, chunks `uses-sdk`, `uses-permission`, `application`, `activity` + intent-filter.
-2. `resources.arsc` — таблица с `string/app_name` и `drawable/ic_launcher`; id = `0x7f << 24 | typeId << 16 | entryIdx`.
-3. `classes.dex` — Dalvik-байткод `com.apkbuilder.runtime.WebAppActivity`: `onCreate` → `WebView` → `setJavaScriptEnabled` / `setDomStorageEnabled` → `loadUrl` → `setContentView`.
-4. ZIP с выравниванием (`align: 4` для manifest/arsc/dex) — так делает `zipalign`.
-5. **APK Signing Block v2** перед центральной директорией: digests → сертификаты → атрибуты → подписи → публичный ключ; EOCD получает смещение блока подписи.
+1. `AndroidManifest.xml` — binary AXML: string pool, resource map, `uses-sdk`, `uses-permission`, `application`, `activity` chunks + intent-filter.
+2. `resources.arsc` — a table with `string/app_name` and `drawable/ic_launcher`; id = `0x7f << 24 | typeId << 16 | entryIdx`.
+3. `classes.dex` — Dalvik bytecode for `com.apkbuilder.runtime.WebAppActivity`: `onCreate` → `WebView` → `setJavaScriptEnabled` / `setDomStorageEnabled` → `loadUrl` → `setContentView`.
+4. ZIP with alignment (`align: 4` for manifest/arsc/dex) — just like `zipalign` does.
+5. **APK Signing Block v2** before the central directory: digests → certificates → attributes → signatures → public key; the EOCD receives the signing block offset.
 
-**Формат подписи v2** (проверено на соответствие `apksig`):
+**v2 signature format** (verified against `apksig`):
 
 ```
 signer = [len] signed_data [len] signatures [len] public_key
@@ -117,85 +117,85 @@ signed_data = [len] digests{[len] [algo u32][digest_len u32][digest]}
               [len] certs{[len] DER}
               [len] attributes  [len] ∅
 digest = SHA-256( [count u32] ‖ Σ SHA-256([chunk_len u32] ‖ chunk) )
-         по entries ‖ central directory ‖ EOCD(cd_offset = signing_block_start)
+         over entries ‖ central directory ‖ EOCD(cd_offset = signing_block_start)
 ```
 
 ---
 
-## 🧾 Каталог ошибок
+## 🧾 Error catalog
 
-Каждая ошибка в приложении имеет **код**, **причину** и **способ исправления** — они видны в интерфейсе и в журнале.
+Every error in the app has a **code**, a **cause** and a **fix** — they are shown in the UI and in the build log.
 
-| Код | Ошибка | Причина |
+| Code | Error | Cause |
 | --- | --- | --- |
-| `E-1001` | Незакрытый HTML-тег | Открывающий тег не имеет парного закрывающего |
-| `E-1003` | Несовпадение тегов | Закрывающий тег не совпадает с последним открытым |
-| `E-1004` | Синтаксическая ошибка JavaScript | Встроенный скрипт не будет исполнен |
-| `E-1011` | Смешанные табы и пробелы | Разные отступы в одном файле |
-| `E-1013` | Пустой проект | Нет файлов для сборки |
-| `E-2001` | Не выбран ключ подписи | APK без подписи не установится |
-| `E-2006` | Некорректная иконка | Нужен PNG ≥ 48×48 |
-| `E-3001` | Файл не является APK | Внутри нет `AndroidManifest.xml` |
-| `E-4001` | Это не XAPK/APKS | В архиве нет базового APK |
-| `E-5001` | Ошибка работы с ключом | Ключ не расшифровывается или повреждён |
-| `E-6003` | Неизвестная ошибка | Непредвиденный сбой движка |
+| `E-1001` | Unclosed HTML tag | An opening tag has no matching closing tag |
+| `E-1003` | Mismatched tags | The closing tag does not match the last opened one |
+| `E-1004` | JavaScript syntax error | The inline script will not run |
+| `E-1011` | Mixed tabs and spaces | Different indentation styles in one file |
+| `E-1013` | Empty project | There are no files to build |
+| `E-2001` | No signing key selected | An unsigned APK cannot be installed |
+| `E-2006` | Invalid icon | A PNG of at least 48×48 is required |
+| `E-3001` | File is not an APK | No `AndroidManifest.xml` inside |
+| `E-4001` | Not a XAPK/APKS | No base APK in the archive |
+| `E-5001` | Key error | The key cannot be decrypted or is corrupted |
+| `E-6003` | Unknown error | An unexpected engine failure |
 
-Полный список — во вкладке **«Справочник»** в приложении.
+The full list is available in the **Reference** tab of the app.
 
 ---
 
-## ⌨️ Горячие клавиши
+## ⌨️ Keyboard shortcuts
 
-| Клавиши | Действие |
+| Keys | Action |
 | --- | --- |
-| `Alt` + `1…8` | Переключение разделов |
-| `` ` `` | Показать / скрыть консоль |
-| `Esc` | Вернуться к текущему разделу |
+| `Alt` + `1…8` | Switch between sections |
+| `` ` `` | Show / hide the console |
+| `Esc` | Return to the current section |
 
 ---
 
-## 🗂 Структура проекта
+## 🗂 Project structure
 
 ```
 ├── src/
-│   ├── engine/          движок (чистый TypeScript, без зависимостей от DOM)
+│   ├── engine/          the engine (pure TypeScript, no DOM dependencies)
 │   ├── components/      UI: Chrome, Panels, CodeEditor, Dropzone, ui, Page
-│   ├── pages/           8 экранов
-│   ├── styles/          дизайн-система global.css
+│   ├── pages/           8 screens
+│   ├── styles/          global.css design system
 │   ├── lib/             idb, utils, nav
-│   ├── store.ts         Zustand-хранилище + автосохранение в IndexedDB
-│   ├── App.tsx          оболочка приложения
+│   ├── store.ts         Zustand store + autosave to IndexedDB
+│   ├── App.tsx          application shell
 │   └── main.tsx
-├── desktop/server.ts    лаунчер для Windows-сборки
-├── tools/               сборка APK, встраивание ассетов, тесты движка
-├── public/              иконки, manifest, apk-builder.apk
-└── release/             готовые артефакты
+├── desktop/server.ts    launcher for the Windows build
+├── tools/               APK build, asset embedding, engine tests
+├── public/              icons, manifest, apk-builder.apk
+└── release/             ready artifacts
 ```
 
 ---
 
-## ⚠️ Ограничения
+## ⚠️ Limitations
 
-- **Android-сборка (APK студии)** работает офлайн, но системный WebView не отдаёт файлы в «Загрузки» — результат хранится внутри проекта. Для экспорта собранных APK используйте десктоп-версию.
-- Собираемые приложения — это **WebView-обёртки** над HTML-проектом или сайтом. Нативный Java/Kotlin-код не компилируется.
-- **Python-файлы** проверяются синтаксически и укладываются в APK как ассеты, но не исполняются на устройстве: для этого нужен отдельный Python-runtime (Chaquopy и т. п.), которого нет в офлайн-движке.
-- Декомпиляция восстанавливает манифест, smali и ресурсы; исходники Java не восстанавливаются (это делает только специализированный decompiler).
-- Ключи подписи хранятся в IndexedDB браузера. **Экспортируйте их** — без ключа нельзя обновить приложение.
-- Windows-версия — портативная (один .exe), установщика нет: см. примечание выше.
-- APK студии подписан **публичным ключом проекта** (`tools/release-key.json`). Он нужен только для сборки самой студии — не используйте его для собственных приложений, для них генерируется личный ключ.
-
----
-
-## 🔒 Приватность
-
-Исходный код, ключи и APK **не покидают устройство**. Приложение не отправляет ни одного сетевого запроса — весь движок выполняется в браузере.
+- **The Android build (studio APK)** works offline, but the system WebView cannot save files to Downloads — results stay inside the project. Use the desktop version to export the APKs you build.
+- The apps you build are **WebView wrappers** around an HTML project or a website. Native Java/Kotlin code is not compiled.
+- **Python files** are syntax-checked and packed into the APK as assets, but they do not run on the device: that requires a separate Python runtime (Chaquopy and the like), which the offline engine does not include.
+- Decompilation recovers the manifest, smali and resources; Java sources are not restored (only a specialised decompiler can do that).
+- Signing keys are stored in the browser's IndexedDB. **Export them** — without the key the app cannot be updated.
+- The studio APK is signed with the **project's public key** (`tools/release-key.json`). It is only used to build the studio itself — do not use it for your own apps, they get a personal key.
+- The Windows version is portable (a single .exe), there is no installer: see the note above.
 
 ---
 
-## 📄 Лицензия
+## 🔒 Privacy
 
-MIT — используйте, изучайте и распространяйте свободно.
+Source code, keys and APKs **never leave the device**. The app does not send a single network request — the whole engine runs in the browser.
+
+---
+
+## 📄 License
+
+MIT — use, study and distribute freely.
 
 <div align="center">
-<sub>Сделано с ❤️ к Android-разработке без Android SDK</sub>
+<sub>Made with ❤️ for Android development without the Android SDK</sub>
 </div>

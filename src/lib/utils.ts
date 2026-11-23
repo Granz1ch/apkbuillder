@@ -1,4 +1,4 @@
-/** Скачивание файла в браузере. */
+/** Downloads a file in the browser. */
 export function downloadBytes(bytes: Uint8Array, filename: string, mime = 'application/octet-stream') {
   const blob = new Blob([bytes as BlobPart], { type: mime });
   const url = URL.createObjectURL(blob);
@@ -17,16 +17,16 @@ export function downloadText(text: string, filename: string, mime = 'text/plain'
 }
 
 /**
- * Приложение запущено в Android WebView (в собственной APK-сборке)?
- * В этом режиме системный WebView не отдаёт файлы через <a download>,
- * поэтому пользователю показываем подсказку.
+ * Is the app running inside an Android WebView (its own APK build)?
+ * In this mode the system WebView cannot export files via <a download>,
+ * so we show the user a hint.
  */
 export function isAndroidWebView(): boolean {
   if (typeof navigator === 'undefined') return false;
   return /\bwv\b/.test(navigator.userAgent) && /Android/i.test(navigator.userAgent);
 }
 
-/** Читает File в Uint8Array. */
+/** Reads a File into a Uint8Array. */
 export function readFileBytes(file: File): Promise<Uint8Array> {
   return new Promise((resolve, reject) => {
     const r = new FileReader();
@@ -36,7 +36,7 @@ export function readFileBytes(file: File): Promise<Uint8Array> {
   });
 }
 
-/** Собирает файлы из webkitDirectory-инпута в список {path, data}. */
+/** Collects files from a webkitDirectory input into a {path, data} list. */
 export async function readDirectoryFiles(files: File[]): Promise<{ path: string; data: Uint8Array }[]> {
   const out: { path: string; data: Uint8Array }[] = [];
   for (const f of files) {

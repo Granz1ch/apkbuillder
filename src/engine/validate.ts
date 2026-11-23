@@ -1,6 +1,6 @@
 /**
- * Валидация исходного кода: HTML / CSS / JS / Python.
- * Возвращает список проблем с точными позициями (строка/колонка, 1-based).
+ * Source code validation: HTML / CSS / JS / Python.
+ * Returns a list of issues with exact positions (line/column, 1-based).
  */
 import { htmlLanguage } from '@codemirror/lang-html';
 import { javascriptLanguage } from '@codemirror/lang-javascript';
@@ -18,7 +18,7 @@ export interface Issue {
   endCol: number;
   message: string;
   hint?: string;
-  source: string; // файл
+  source: string; // file
 }
 
 const parsers: Record<string, any> = {};
@@ -46,7 +46,7 @@ function getParser(lang: Lang) {
   return parsers[lang];
 }
 
-/** Таблица смещений строк для перевода pos → (line, col). */
+/** Line offset table to convert pos → (line, col). */
 export class LineMap {
   private starts: number[] = [0];
   constructor(public text: string) {
@@ -73,7 +73,7 @@ export class LineMap {
   }
 }
 
-/** Ищет синтаксические ошибки парсера Lezer. */
+/** Looks for syntax errors reported by the Lezer parser. */
 function parserIssues(text: string, lang: Lang, source: string): Issue[] {
   const out: Issue[] = [];
   let parser: any;
@@ -98,17 +98,17 @@ function parserIssues(text: string, lang: Lang, source: string): Issue[] {
           endCol: b.col,
           message:
             lang === 'python'
-              ? 'Синтаксическая ошибка Python'
+              ? 'Python syntax error'
               : lang === 'css'
-                ? 'Синтаксическая ошибка CSS'
-                : 'Синтаксическая ошибка JavaScript',
-          hint: `Не удалось разобрать конструкцию в позиции ${a.line}:${a.col}`,
+                ? 'CSS syntax error'
+                : 'JavaScript syntax error',
+          hint: `Could not parse the construct at ${a.line}:${a.col}`,
           source,
         });
       },
     });
   } catch {
-    /* парсер не справился — не критично */
+    /* parser failed — not critical */
   }
   return out;
 }
@@ -148,7 +148,7 @@ function tokenizeHtml(text: string): TagTok[] {
     }
     const closing = m[1] === '/';
     const name = m[2].toLowerCase();
-    // найдём конец тега
+    // find the end of the tag
     let j = lt + 1;
     let quote: string | null = null;
     while (j < n) {
@@ -197,8 +197,8 @@ function htmlIssues(text: string, source: string): Issue[] {
               col: p.col,
               endLine: p.line,
               endCol: p.col + 6,
-              message: `Дублирующийся id="${idm[1]}"`,
-              hint: 'Атрибут id должен быть уникальным',
+              message: `Duplicate id="${idm[1]}"`,
+              hint: 'The id attribute must be unique',
               source,
             });
           }
@@ -217,8 +217,8 @@ function htmlIssues(text: string, source: string): Issue[] {
           col: p.col,
           endLine: p.line,
           endCol: p.col + 8,
-          message: `Лишний закрывающий тег </${t.name}>`,
-          hint: 'Удалите тег или проверьте вложенность',
+          message: `Stray closing tag </${t.name}>`,
+          hint: 'Remove the tag or check the nesting',
           source,
         });
         continue;
@@ -228,7 +228,7 @@ function htmlIssues(text: string, source: string): Issue[] {
       } else {
         const idx = stack.map((s) => s.name).lastIndexOf(t.name);
         if (idx >= 0) {
-          // есть незакрытые между
+          // there are unclosed tags in between
           for (let k = stack.length - 1; k > idx; k--) {
             const s = stack[k];
             const p = lm.lineCol(s.pos);
@@ -239,8 +239,8 @@ function htmlIssues(text: string, source: string): Issue[] {
               col: p.col,
               endLine: p.line,
               endCol: p.col + s.name.length + 2,
-              message: `Незакрытый тег <${s.name}>`,
-              hint: `Добавьте </${s.name}> перед </${t.name}>`,
+              message: `Unclosed tag <${s.name}>`,
+              hint: `Add </${s.name}> before </${t.name}>`,
               source,
             });
             stack.pop();
@@ -255,15 +255,15 @@ function htmlIssues(text: string, source: string): Issue[] {
             col: p.col,
             endLine: p.line,
             endCol: p.col + t.name.length + 3,
-            message: `Ожидался </${last.name}>, получен </${t.name}>`,
-            hint: 'Проверьте порядок закрывающих тегов',
+            message: `Expected </${last.name}>, got </${t.name}>`,
+            hint: 'Check the order of closing tags',
             source,
           });
         }
       }
     } else if (!t.selfClose) {
       stack.push({ name: t.name, pos: t.pos });
-      // img без alt
+      // img without alt
       if (t.name === 'img' && !/\balt\s*=/i.test(t.attrs)) {
         const p = lm.lineCol(t.pos);
         out.push({
@@ -273,8 +273,8 @@ function htmlIssues(text: string, source: string): Issue[] {
           col: p.col,
           endLine: p.line,
           endCol: p.col + 5,
-          message: 'Изображение без alt',
-          hint: 'Добавьте alt="описание"',
+          message: 'Image without alt',
+          hint: 'Add alt="description"',
           source,
         });
       }
@@ -289,8 +289,8 @@ function htmlIssues(text: string, source: string): Issue[] {
       col: p.col,
       endLine: p.line,
       endCol: p.col + s.name.length + 2,
-      message: `Незакрытый тег <${s.name}>`,
-      hint: `Добавьте </${s.name}>`,
+      message: `Unclosed tag <${s.name}>`,
+      hint: `Add </${s.name}>`,
       source,
     });
   }
@@ -303,13 +303,13 @@ function htmlIssues(text: string, source: string): Issue[] {
       col: 1,
       endLine: 1,
       endCol: 2,
-      message: 'Отсутствует <!DOCTYPE html>',
-      hint: 'Добавьте первой строкой: <!DOCTYPE html>',
+      message: 'Missing <!DOCTYPE html>',
+      hint: 'Add as the first line: <!DOCTYPE html>',
       source,
     });
   }
 
-  // встроенные <script> и <style>
+  // inline <script> and <style>
   const scriptRe = /<script\b[^>]*>([\s\S]*?)<\/script>/gi;
   let m: RegExpExecArray | null;
   while ((m = scriptRe.exec(text))) {
@@ -323,7 +323,7 @@ function htmlIssues(text: string, source: string): Issue[] {
         ...issue,
         line: issue.line + baseLine - 1,
         col: baseLine === 1 ? issue.col + baseCol - 1 : issue.col,
-        message: 'Синтаксическая ошибка JavaScript в <script>',
+        message: 'JavaScript syntax error in <script>',
       });
     }
   }
@@ -339,7 +339,7 @@ function htmlIssues(text: string, source: string): Issue[] {
         ...issue,
         line: issue.line + baseLine - 1,
         col: baseLine === 1 ? issue.col + baseCol - 1 : issue.col,
-        message: 'Синтаксическая ошибка CSS в <style>',
+        message: 'CSS syntax error in <style>',
       });
     }
   }
@@ -370,8 +370,8 @@ function cssIssues(text: string, source: string): Issue[] {
       col: p.col,
       endLine: p.line,
       endCol: p.col + 1,
-      message: 'Незакрытая фигурная скобка',
-      hint: 'Добавьте недостающую }',
+      message: 'Unclosed brace',
+      hint: 'Add the missing }',
       source,
     });
   }
@@ -399,8 +399,8 @@ function pythonIssues(text: string, source: string): Issue[] {
         col: 1,
         endLine: i + 1,
         endCol: 5,
-        message: 'Смешанные табы и пробелы в отступах',
-        hint: 'Используйте только пробелы',
+        message: 'Mixed tabs and spaces in indentation',
+        hint: 'Use spaces only',
         source,
       });
       break;
@@ -416,7 +416,7 @@ function jsonIssues(text: string, source: string): Issue[] {
     JSON.parse(text);
     return [];
   } catch (e) {
-    const msg = e instanceof Error ? e.message : 'Некорректный JSON';
+    const msg = e instanceof Error ? e.message : 'Invalid JSON';
     const m = /position (\d+)/.exec(msg);
     const pos = m ? parseInt(m[1], 10) : 0;
     const lm = new LineMap(text);
@@ -429,7 +429,7 @@ function jsonIssues(text: string, source: string): Issue[] {
         col: p.col,
         endLine: p.line,
         endCol: p.col + 1,
-        message: 'Синтаксическая ошибка JSON',
+        message: 'JSON syntax error',
         hint: msg,
         source,
       },
@@ -457,7 +457,7 @@ export function detectLang(filename: string): Lang {
   return 'html';
 }
 
-/** Главная точка входа: валидирует файл и возвращает проблемы. */
+/** Main entry point: validates a file and returns the issues. */
 export function validateCode(filename: string, text: string): Issue[] {
   if (!text.trim()) return [];
   const lang = detectLang(filename);

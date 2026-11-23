@@ -1,6 +1,6 @@
 /**
- * Собирает APK самой студии из готового dist/ (vite build).
- * Внутрь assets/app/ кладётся вся веб-сборка, WebView открывает index.html.
+ * Builds the APK of the studio itself from the finished dist/ (vite build).
+ * The whole web build goes into assets/app/, the WebView opens index.html.
  *
  *   npm run build && npm run apk:self
  */
@@ -23,7 +23,7 @@ function walk(dir: string, base = ''): ApkAsset[] {
     const full = join(dir, name);
     const rel = base ? `${base}/${name}` : name;
     if (statSync(full).isDirectory()) out.push(...walk(full, rel));
-    else if (rel === 'apk-builder.apk') continue; // не вкладываем APK самого себя
+    else if (rel === 'apk-builder.apk') continue; // never embed the APK inside itself
     else out.push({ path: `assets/app/${rel}`, data: new Uint8Array(readFileSync(full)) });
   }
   return out;
@@ -32,7 +32,7 @@ function walk(dir: string, base = ''): ApkAsset[] {
 async function loadKey(): Promise<StoredKey> {
   if (existsSync(KEY_PATH)) {
     const stored = JSON.parse(readFileSync(KEY_PATH, 'utf8')) as StoredKey;
-    await importStoredKey(stored); // проверяем, что ключ расшифровывается
+    await importStoredKey(stored); // make sure the key can be decrypted
     return stored;
   }
   const kp = await createSelfSignedCertificate({
@@ -49,12 +49,12 @@ async function loadKey(): Promise<StoredKey> {
 
 async function main() {
   if (!existsSync(join(DIST, 'index.html'))) {
-    console.error('dist/ не найден — сначала выполните npm run build');
+    console.error('dist/ not found — run npm run build first');
     process.exit(1);
   }
   const assets = walk(DIST);
   const total = assets.reduce((a, b) => a + b.data.length, 0);
-  console.log(`Файлов веб-сборки: ${assets.length} (${(total / 1024).toFixed(0)} КБ)`);
+  console.log(`Web build files: ${assets.length} (${(total / 1024).toFixed(0)} KB)`);
 
   const stored = await loadKey();
   const { privateKey, certificate } = await importStoredKey(stored);
@@ -81,9 +81,9 @@ async function main() {
   writeFileSync(join(ROOT, 'public', 'apk-builder.apk'), res.bytes);
   const outName = `APK-Builder-${VERSION_NAME}.apk`;
   writeFileSync(join(ROOT, 'release', outName), res.bytes);
-  console.log(`APK: ${outName} — ${(res.bytes.length / 1024).toFixed(0)} КБ, файлов внутри: ${res.files.length}`);
-  if (res.warnings.length) console.log('Предупреждения:', res.warnings);
-  console.log(`Отпечаток ключа: ${stored.fingerprint}`);
+  console.log(`APK: ${outName} — ${(res.bytes.length / 1024).toFixed(0)} KB, ${res.files.length} files inside`);
+  if (res.warnings.length) console.log('Warnings:', res.warnings);
+  console.log(`Key fingerprint: ${stored.fingerprint}`);
 }
 
 main().catch((e) => {

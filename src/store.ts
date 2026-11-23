@@ -1,5 +1,5 @@
 /**
- * Глобальное состояние приложения (zustand) + персистентность в IndexedDB.
+ * Global application state (zustand) + persistence in IndexedDB.
  */
 import { create } from 'zustand';
 import { idbGet, idbSet } from './lib/idb';
@@ -52,38 +52,38 @@ const DEFAULT_SETTINGS: Settings = {
 };
 
 export const SAMPLE_HTML = `<!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Моё приложение</title>
+  <title>My App</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <main class="app">
     <header class="hero">
       <div class="badge">APK BUILDER</div>
-      <h1>Привет, мир 👋</h1>
-      <p>Это приложение собрано из обычного HTML. Замените код слева — и соберите свой APK.</p>
+      <h1>Hello, world 👋</h1>
+      <p>This app is built from plain HTML. Replace the code on the left and build your own APK.</p>
     </header>
 
     <section class="grid">
       <button class="tile" data-action="vibrate">
         <span class="ico">⚡</span>
-        <span class="t">Вибрация</span>
+        <span class="t">Vibration</span>
       </button>
       <button class="tile" data-action="toast">
         <span class="ico">🔔</span>
-        <span class="t">Уведомление</span>
+        <span class="t">Notification</span>
       </button>
       <button class="tile" data-action="theme">
         <span class="ico">🌙</span>
-        <span class="t">Тема</span>
+        <span class="t">Theme</span>
       </button>
     </section>
 
     <footer class="foot">
-      <span>Собрано в <b>APK Builder</b></span>
+      <span>Built with <b>APK Builder</b></span>
       <span class="dot"></span>
       <span id="clock">--:--</span>
     </footer>
@@ -144,11 +144,11 @@ p  { color: var(--muted); font-size: 14px; line-height: 1.6; margin: 0; }
 .foot .dot { width: 3px; height: 3px; border-radius: 50%; background: var(--muted); }
 `;
 
-export const SAMPLE_JS = `// Лёгкая логика приложения
+export const SAMPLE_JS = `// Lightweight app logic
 const clock = document.getElementById('clock');
 
 function tick() {
-  clock.textContent = new Date().toLocaleTimeString('ru-RU', {
+  clock.textContent = new Date().toLocaleTimeString('en-GB', {
     hour: '2-digit',
     minute: '2-digit',
   });
@@ -161,7 +161,7 @@ document.querySelectorAll('.tile').forEach((tile) => {
   tile.addEventListener('click', () => {
     const action = tile.dataset.action;
     if (action === 'vibrate' && navigator.vibrate) navigator.vibrate(30);
-    if (action === 'toast') alert('Работает! 🎉');
+    if (action === 'toast') alert('It works! 🎉');
     if (action === 'theme') document.body.classList.toggle('dark');
   });
 });
@@ -169,14 +169,14 @@ document.querySelectorAll('.tile').forEach((tile) => {
 
 export const SAMPLE_PY = `# Python → APK
 #
-# Python-код проверяется на синтаксис и сохраняется в проект.
-# Для сборки нативного APK используйте HTML-проект:
-# движок собирает WebView-обёртку, а скрипт остаётся в assets.
+# Python code is syntax-checked and stored in the project.
+# To build a native APK use an HTML project:
+# the engine builds a WebView wrapper, while the script stays in assets.
 #
-# Пример валидного кода:
+# Example of valid code:
 
 def greet(name: str) -> str:
-    return f"Привет, {name}!"
+    return f"Hello, {name}!"
 
 
 class App:
@@ -189,7 +189,7 @@ class App:
 
 
 if __name__ == "__main__":
-    App("Демо").run()
+    App("Demo").run()
 `;
 
 export interface AppState {
@@ -230,7 +230,7 @@ const nextId = () => `${Date.now().toString(36)}${(uid++).toString(36)}`;
 
 export const useStore = create<AppState>((set, get) => ({
   booted: false,
-  projectName: 'Мой проект',
+  projectName: 'My Project',
   files: {
     'src/index.html': new TextEncoder().encode(SAMPLE_HTML),
     'src/style.css': new TextEncoder().encode(SAMPLE_CSS),
@@ -258,13 +258,13 @@ export const useStore = create<AppState>((set, get) => ({
     ]);
     set({
       booted: true,
-      projectName: meta?.projectName ?? 'Мой проект',
+      projectName: meta?.projectName ?? 'My Project',
       files: files && Object.keys(files).length ? files : get().files,
       keys: keys ?? [],
       history: history ?? [],
       settings: { ...DEFAULT_SETTINGS, ...(settings ?? {}) },
     });
-    get().log('ok', 'Движок APK Builder инициализирован');
+    get().log('ok', 'APK Builder engine initialized');
   },
 
   setProjectName: (n) => {
@@ -331,7 +331,7 @@ export const useStore = create<AppState>((set, get) => ({
   setActivePage: (p) => set({ activePage: p, sidebarOpen: false }),
 }));
 
-/* ---------- автосохранение ---------- */
+/* ---------- autosave ---------- */
 let saveTimer: number | null = null;
 useStore.subscribe((state, prev) => {
   if (!state.booted) return;

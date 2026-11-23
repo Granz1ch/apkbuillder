@@ -1,6 +1,6 @@
 /**
- * ZIP: запись (с контролем выравнивания) и чтение.
- * Свой writer нужен для точного контроля смещений при подписи APK Signature Scheme v2.
+ * ZIP: writing (with alignment control) and reading.
+ * A custom writer is needed for precise offset control when signing with APK Signature Scheme v2.
  */
 import { ByteWriter, crc32, enc, dec, concat } from './bytes';
 import { deflateSync, inflateSync } from 'fflate';
@@ -9,9 +9,9 @@ export interface ZipEntryInput {
   name: string;
   data: Uint8Array;
   method?: 'store' | 'deflate';
-  /** выравнивание начала данных (например 4 для .so / ресурсов) */
+  /** alignment of the data start (e.g. 4 for .so / resources) */
   align?: number;
-  /** путь внутри APK (для сортировки) */
+  /** path inside the APK (for sorting) */
   extra?: Uint8Array;
 }
 
@@ -46,20 +46,20 @@ export class ZipWriter {
       const crc = crc32(e.data);
       const align = e.align ?? (method === 0 ? 4 : 1);
 
-      // локальный заголовок
+      // local header
       const headerStart = out.offset;
-      // вычисляем extra для выравнивания данных
+      // compute extra to align the data
       let extraLen = 0;
       const dataStartNoExtra = headerStart + 30 + nameBytes.length;
       if (align > 1) {
         const pad = (align - (dataStartNoExtra % align)) % align;
         if (pad > 0) {
-          // extra field: header id + size + data (min 4 байта)
+          // extra field: header id + size + data (min 4 bytes)
           extraLen = 4 + pad;
-          if (pad < 4) extraLen = 4 + pad + 4; // не бывает: pad>=1 => extraLen>=5
+          if (pad < 4) extraLen = 4 + pad + 4; // never happens: pad>=1 => extraLen>=5
         }
       }
-      // Для простоты: если нужен паддинг, добавляем extra с id 0xd935 (zipalign pad)
+      // For simplicity: when padding is needed we add an extra field with id 0xd935 (zipalign pad)
       let extraBytes = new Uint8Array(0);
       if (extraLen > 0) {
         const w = new ByteWriter(extraLen);
@@ -85,7 +85,7 @@ export class ZipWriter {
       out.bytes(nameBytes);
       out.bytes(extraBytes);
       if (dataStart !== out.offset) {
-        // страховка
+        // safety net
         const diff = dataStart - out.offset;
         if (diff > 0) out.bytes(new Uint8Array(diff));
       }
@@ -93,7 +93,7 @@ export class ZipWriter {
 
       offsets.push({ name: e.name, offset: headerStart, size: data.length, crc, method });
 
-      // центральная директория
+      // central directory
       const cd = new ByteWriter(nameBytes.length + 64);
       cd.u32(SIG_CENTRAL);
       cd.u16(20); // version made by
@@ -133,7 +133,7 @@ export class ZipWriter {
   }
 }
 
-/* ------------------------------ чтение ------------------------------ */
+/* ------------------------------ reading ------------------------------ */
 
 export interface ZipEntry {
   name: string;
@@ -146,12 +146,12 @@ export interface ZipEntry {
 }
 
 /**
- * Парсер ZIP по центральной директории.
- * Не использует fflate для чтения, чтобы получать смещения (нужно для подписи и XAPK).
+ * ZIP parser based on the central directory.
+ * fflate is not used for reading so we can get offsets (needed for signing and XAPK).
  */
 export function readZip(bytes: Uint8Array): ZipEntry[] {
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  // поиск EOCD с конца
+  // search for EOCD from the end
   let eocd = -1;
   for (let i = bytes.length - 22; i >= Math.max(0, bytes.length - 70000); i--) {
     if (dv.getUint32(i, true) === SIG_EOCD) {
@@ -159,14 +159,14 @@ export function readZip(bytes: Uint8Array): ZipEntry[] {
       break;
     }
   }
-  if (eocd < 0) throw new Error('ZIP: не найдена End of Central Directory (файл повреждён?)');
+  if (eocd < 0) throw new Error('ZIP: End of Central Directory not found (corrupted file?)');
   const count = dv.getUint16(eocd + 10, true);
   const cdSize = dv.getUint32(eocd + 12, true);
   let cdOffset = dv.getUint32(eocd + 16, true);
 
   // ZIP64?
   if (cdOffset === 0xffffffff || count === 0xffff) {
-    // ищем zip64 EOCD locator
+    // look for the zip64 EOCD locator
     const loc = eocd - 20;
     if (loc >= 0 && dv.getUint32(loc, true) === 0x07064b50) {
       const z64 = Number(dv.getBigUint64(loc + 8, true));
@@ -191,18 +191,18 @@ export function readZip(bytes: Uint8Array): ZipEntry[] {
     entries.push({ name, data, size, compressedSize: compSize, method, crc, localHeaderOffset: lho });
     p += 46 + nameLen + extraLen + commentLen;
   }
-  if (entries.length === 0) throw new Error('ZIP: пустой или повреждённый архив');
+  if (entries.length === 0) throw new Error('ZIP: empty or corrupted archive');
   return entries;
 }
 
 function extractEntry(bytes: Uint8Array, lho: number, compSize: number, size: number, method: number): Uint8Array {
   const dv = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
-  if (dv.getUint32(lho, true) !== SIG_LOCAL) throw new Error('ZIP: повреждён локальный заголовок');
+  if (dv.getUint32(lho, true) !== SIG_LOCAL) throw new Error('ZIP: corrupted local header');
   const nameLen = dv.getUint16(lho + 26, true);
   const extraLen = dv.getUint16(lho + 28, true);
   const start = lho + 30 + nameLen + extraLen;
   const raw = bytes.subarray(start, start + compSize);
   if (method === 0) return raw;
   if (method === 8) return inflateSync(raw);
-  throw new Error(`ZIP: неподдерживаемый метод сжатия ${method}`);
+  throw new Error(`ZIP: unsupported compression method ${method}`);
 }

@@ -9,10 +9,10 @@ async function main() {
 
   const html = `<!doctype html><html><head><meta charset="utf-8"><title>Test</title>
 <style>body{font-family:sans-serif;background:#0b0d12;color:#fff;display:grid;place-items:center;height:100vh;margin:0}</style></head>
-<body><h1>Привет, APK Builder! 👋</h1></body></html>`;
+<body><h1>Hello, APK Builder! 👋</h1></body></html>`;
 
   const res = await buildApk({
-    appName: 'Тестовое приложение',
+    appName: 'Test App',
     packageName: 'com.apkbuilder.demo',
     versionName: '1.0.0',
     versionCode: 1,

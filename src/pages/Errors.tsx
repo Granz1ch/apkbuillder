@@ -5,12 +5,12 @@ import { Card, Badge, Input } from '../components/ui';
 import { ERROR_CATALOG, type ErrorDef } from '../engine/errors';
 
 const SCOPES: Record<string, string> = {
-  validator: 'Валидация кода',
-  build: 'Сборка',
-  decompile: 'Декомпиляция',
+  validator: 'Validation',
+  build: 'Build',
+  decompile: 'Decompilation',
   xapk: 'XAPK',
-  sign: 'Подпись',
-  engine: 'Движок',
+  sign: 'Signing',
+  engine: 'Engine',
 };
 
 export function ErrorsPage() {
@@ -40,24 +40,24 @@ export function ErrorsPage() {
     <Page>
       <PageHead
         num="06"
-        eyebrow="Справочник"
+        eyebrow="Reference"
         title={
           <>
-            Каждый сбой — со своим <em>идентификатором</em>
+            Every failure has its own <em>identifier</em>
           </>
         }
-        sub="Все ошибки приложения имеют код, причину и способ исправления. Ищите по коду, названию или описанию."
-        actions={<Badge tone="accent">всего {ERROR_CATALOG.length}</Badge>}
+        sub="Every error in the app has a code, a cause and a way to fix it. Search by code, title or description."
+        actions={<Badge tone="accent">{ERROR_CATALOG.length} total</Badge>}
       />
 
       <div className="flex gap-10 mb-16" style={{ flexWrap: 'wrap' }}>
         <div style={{ position: 'relative', flex: 1, minWidth: 240 }}>
           <Search size={14} style={{ position: 'absolute', left: 12, top: 13, color: 'var(--text-4)' }} />
-          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Поиск: E-2001, подпись, декомпиляция…" style={{ paddingLeft: 34 }} />
+          <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search: E-2001, signing, decompilation…" style={{ paddingLeft: 34 }} />
         </div>
         <div className="tabs">
           <div className={`tab ${scope === 'all' ? 'active' : ''}`} onClick={() => setScope('all')}>
-            Все
+            All
           </div>
           {Object.entries(SCOPES).map(([k, v]) => (
             <div key={k} className={`tab ${scope === k ? 'active' : ''}`} onClick={() => setScope(k)}>
@@ -98,7 +98,7 @@ export function ErrorsPage() {
                     </Badge>
                   </div>
                   <div style={{ fontSize: 12, color: 'var(--text-2)', marginTop: 6, lineHeight: 1.55 }}>
-                    <span style={{ color: 'var(--text-4)' }}>Причина: </span>
+                    <span style={{ color: 'var(--text-4)' }}>Cause: </span>
                     {e.cause}
                   </div>
                   <div className="flex gap-8" style={{ fontSize: 12, marginTop: 5, lineHeight: 1.55 }}>
@@ -113,8 +113,8 @@ export function ErrorsPage() {
         {list.length === 0 && (
           <div className="empty">
             <BookOpen size={20} />
-            <div className="t">Ничего не найдено</div>
-            <div className="s">Попробуйте другой запрос</div>
+            <div className="t">Nothing found</div>
+            <div className="s">Try another query</div>
           </div>
         )}
       </div>

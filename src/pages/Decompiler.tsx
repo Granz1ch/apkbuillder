@@ -60,16 +60,16 @@ export function Decompiler() {
       setResult(res);
       setTab('manifest');
       setClassIdx(0);
-      log('ok', `Декомпилировано: ${f.name} → ${folder} (${res.files.length} файлов)`);
+      log('ok', `Decompiled: ${f.name} → ${folder} (${res.files.length} files)`);
       res.warnings.forEach((w) => log('warn', w, w.startsWith('E-') ? w.slice(0, 6) : undefined));
       pushHistory({ id: `${Date.now()}`, type: 'decompile', name: folder, size: bytes.length, at: Date.now(), path: folder, ok: true });
-      toast('ok', 'Декомпиляция завершена', `${res.report.classes} классов · ${res.report.methods} методов`);
+      toast('ok', 'Decompilation finished', `${res.report.classes} classes · ${res.report.methods} methods`);
     } catch (e: unknown) {
       const id = (e as any)?.code ?? (e instanceof Error && e.message.startsWith('E-') ? e.message.slice(0, 6) : 'E-3002');
       const def = getErrorDef(id);
       setError({ id, title: def.title, detail: e instanceof Error ? e.message : String(e) });
       log('err', `${def.title}: ${e instanceof Error ? e.message : String(e)}`, id);
-      toast('err', 'Не удалось декомпилировать', def.title);
+      toast('err', 'Decompilation failed', def.title);
     } finally {
       setBusy(false);
     }
@@ -81,28 +81,28 @@ export function Decompiler() {
     for (const f of result.files) zip.addFile(f.path, f.data, { method: 'deflate' });
     const bytes = zip.build();
     downloadBytes(bytes, `${slugify(apkName.replace(/\.apk$/i, ''))}-decompiled.zip`, 'application/zip');
-    log('ok', 'Архив декомпиляции скачан');
+    log('ok', 'Decompiled archive downloaded');
   };
 
   return (
     <Page>
       <PageHead
         num="03"
-        eyebrow="Декомпилятор"
+        eyebrow="Decompiler"
         title={
           <>
-            Загляни <em>внутрь APK</em>
+            Look <em>inside an APK</em>
           </>
         }
-        sub="Разберите любой APK на составляющие: декодированный манифест, smali-байткод, ресурсы, ассеты и подпись."
+        sub="Break any APK down into its parts: decoded manifest, smali bytecode, resources, assets and the signature."
         actions={
           result ? (
             <Button variant="primary" icon={<Download size={15} />} onClick={downloadZip}>
-              Скачать проект
+              Download project
             </Button>
           ) : (
             <Button variant="ghost" icon={<Upload size={15} />} onClick={() => document.querySelector<HTMLInputElement>('.dropzone input')?.click()}>
-              Загрузить APK
+              Upload APK
             </Button>
           )
         }
@@ -111,18 +111,18 @@ export function Decompiler() {
       {!result && !busy && (
         <Card>
           <div style={{ padding: 24 }}>
-            <Dropzone accept=".apk,application/vnd.android.package-archive" onFiles={run} title="Перетащите .apk файл" sub="Файл обрабатывается локально — никуда не отправляется">
+            <Dropzone accept=".apk,application/vnd.android.package-archive" onFiles={run} title="Drop a .apk file" sub="The file is processed locally — it never leaves the device">
               <div className="ico">
                 <ScanSearch />
               </div>
-              <div className="t">Перетащите .apk файл</div>
-              <div className="s">Декомпиляция выполняется локально: манифест, DEX → smali, ресурсы</div>
+              <div className="t">Drop a .apk file</div>
+              <div className="s">Decompilation runs locally: manifest, DEX → smali, resources</div>
             </Dropzone>
             <div className="grid g-3 mt-20">
               {[
-                { i: FileCode2, t: 'Манифест', d: 'Бинарный AXML → читаемый XML с разрешениями и компонентами' },
-                { i: Activity, t: 'Байткод', d: 'DEX → smali-подобный листинг всех классов и методов' },
-                { i: FolderTree, t: 'Ресурсы', d: 'Все файлы APK извлекаются в папку decompilation/' },
+                { i: FileCode2, t: 'Manifest', d: 'Binary AXML → readable XML with permissions and components' },
+                { i: Activity, t: 'Bytecode', d: 'DEX → smali-like listing of all classes and methods' },
+                { i: FolderTree, t: 'Resources', d: 'Every APK file is extracted into the decompilation/ folder' },
               ].map((x) => {
                 const I = x.i;
                 return (
@@ -146,9 +146,9 @@ export function Decompiler() {
         <Card>
           <div className="flex center col gap-10" style={{ padding: 70 }}>
             <Loader2 size={26} className="pulse-soft" style={{ color: 'var(--accent)' }} />
-            <div style={{ fontSize: 13, color: 'var(--text-2)' }}>Анализируем APK…</div>
+            <div style={{ fontSize: 13, color: 'var(--text-2)' }}>Analyzing the APK…</div>
             <div className="tiny" style={{ color: 'var(--text-4)' }}>
-              Читаем манифест, ресурсы и DEX-байткод
+              Reading the manifest, resources and DEX bytecode
             </div>
           </div>
         </Card>
@@ -174,7 +174,7 @@ export function Decompiler() {
           <div className="grid g-4 mb-16">
             <div className="kpi">
               <div className="kpi-label">
-                <Package size={11} /> Пакет
+                <Package size={11} /> Package
               </div>
               <div className="mono" style={{ fontSize: 12.5, marginTop: 9, wordBreak: 'break-all', color: 'var(--accent)' }}>
                 {result.report.package}
@@ -182,7 +182,7 @@ export function Decompiler() {
             </div>
             <div className="kpi">
               <div className="kpi-label">
-                <Smartphone size={11} /> Приложение
+                <Smartphone size={11} /> App
               </div>
               <div style={{ fontSize: 15, fontWeight: 600, marginTop: 7 }}>{result.report.appName || '—'}</div>
               <div className="kpi-delta">
@@ -191,7 +191,7 @@ export function Decompiler() {
             </div>
             <div className="kpi">
               <div className="kpi-label">
-                <Layers size={11} /> Классы / методы
+                <Layers size={11} /> Classes / methods
               </div>
               <div className="kpi-value" style={{ fontSize: 21 }}>
                 {result.report.classes}
@@ -207,7 +207,7 @@ export function Decompiler() {
                 {result.report.minSdk}
                 <span className="u">→ {result.report.targetSdk}</span>
               </div>
-              <div className="kpi-delta">{formatBytes(result.report.size)} · {result.report.files} файлов</div>
+              <div className="kpi-delta">{formatBytes(result.report.size)} · {result.report.files} files</div>
             </div>
           </div>
 
@@ -215,13 +215,13 @@ export function Decompiler() {
             <div className="card-head" style={{ flexWrap: 'wrap', gap: 10 }}>
               <div className="tabs">
                 <div className={`tab ${tab === 'manifest' ? 'active' : ''}`} onClick={() => setTab('manifest')}>
-                  Манифест
+                  Manifest
                 </div>
                 <div className={`tab ${tab === 'smali' ? 'active' : ''}`} onClick={() => setTab('smali')}>
                   Smali <span className="cnt">{smaliFiles.length}</span>
                 </div>
                 <div className={`tab ${tab === 'files' ? 'active' : ''}`} onClick={() => setTab('files')}>
-                  Файлы <span className="cnt">{otherFiles.length}</span>
+                  Files <span className="cnt">{otherFiles.length}</span>
                 </div>
               </div>
               <div className="spacer" />
@@ -229,14 +229,14 @@ export function Decompiler() {
                 {result.report.activities.length} activities
               </Badge>
               <Badge tone="ok" icon={<ShieldCheck size={11} />}>
-                подпись v2
+                v2 signature
               </Badge>
             </div>
 
             {tab === 'manifest' && (
               <div className="grid g-23" style={{ gap: 0 }}>
                 <div style={{ borderRight: '1px solid var(--border)' }}>
-                  <div className="section-title" style={{ padding: '14px 16px 0' }}>Разрешения</div>
+                  <div className="section-title" style={{ padding: '14px 16px 0' }}>Permissions</div>
                   <div className="flex gap-6" style={{ padding: '0 16px 16px', flexWrap: 'wrap' }}>
                     {result.report.permissions.length ? (
                       result.report.permissions.map((p) => (
@@ -245,7 +245,7 @@ export function Decompiler() {
                         </span>
                       ))
                     ) : (
-                      <span className="tiny muted">Нет</span>
+                      <span className="tiny muted">None</span>
                     )}
                   </div>
                   <div className="section-title" style={{ padding: '0 16px' }}>Activities</div>
@@ -303,7 +303,7 @@ export function Decompiler() {
                     <span className="mono" style={{ color: 'var(--text-4)' }}>{formatBytes(f.data.length)}</span>
                   </div>
                 ))}
-                {otherFiles.length > 400 && <div className="tiny muted" style={{ padding: 8 }}>+ ещё {otherFiles.length - 400} файлов</div>}
+                {otherFiles.length > 400 && <div className="tiny muted" style={{ padding: 8 }}>+ {otherFiles.length - 400} more files</div>}
               </div>
             )}
           </Card>
@@ -312,8 +312,8 @@ export function Decompiler() {
             <div className="flex gap-12">
               <FolderTree size={16} style={{ color: 'var(--accent)', flex: 'none', marginTop: 2 }} />
               <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6 }}>
-                Проект сохранён в <span className="code-inline">decompilation/{slugify(apkName.replace(/\.apk$/i, ''))}-…/</span>.
-                Внутри: <span className="mono">AndroidManifest.xml</span>, <span className="mono">smali/</span> и все файлы APK.
+                The project was saved to <span className="code-inline">decompilation/{slugify(apkName.replace(/\.apk$/i, ''))}-…/</span>.
+                Inside: <span className="mono">AndroidManifest.xml</span>, <span className="mono">smali/</span> and all APK files.
               </div>
             </div>
           </Card>

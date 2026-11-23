@@ -1,6 +1,6 @@
 /**
- * Низкоуровневые утилиты для работы с байтами.
- * Всё isomorphic: работает и в браузере, и в Node.
+ * Low-level byte utilities.
+ * Everything is isomorphic: works in the browser and in Node.
  */
 
 export const enc = new TextEncoder();
@@ -109,7 +109,7 @@ export class ByteWriter {
     return this;
   }
 
-  /** UTF-8 строка с uleb128 длиной в UTF-16 код-юнитах (формат DEX string_data). */
+  /** UTF-8 string with a uleb128 length in UTF-16 code units (DEX string_data format). */
   dexString(s: string) {
     this.uleb128(s.length);
     this.bytes(enc.encode(s));
@@ -131,7 +131,7 @@ export class ByteWriter {
   }
 }
 
-/* ----------------------------- чтение ----------------------------- */
+/* ----------------------------- reading ----------------------------- */
 
 export class ByteReader {
   view: DataView;
@@ -260,14 +260,14 @@ export function utf16Length(s: string): number {
   return s.length;
 }
 
-/** Сравнение строк в порядке UTF-16 code units (как того требует DEX). */
+/** Compares strings in UTF-16 code unit order (as DEX requires). */
 export function cmpStr(a: string, b: string): number {
   if (a === b) return 0;
   return a < b ? -1 : 1;
 }
 
 export function formatBytes(n: number): string {
-  if (n < 1024) return `${n} Б`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} КБ`;
-  return `${(n / 1024 / 1024).toFixed(2)} МБ`;
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
 }

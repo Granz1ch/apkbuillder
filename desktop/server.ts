@@ -1,11 +1,11 @@
 /**
- * APK Builder — настольный лаунчер.
- * Поднимает локальный статический сервер и открывает приложение в браузере.
- * Один исполняемый файл: вся веб-сборка встроена (desktop/assets.ts).
+ * APK Builder — desktop launcher.
+ * Starts a local static server and opens the app in a browser.
+ * A single executable: the whole web build is embedded (desktop/assets.ts).
  */
 import { ASSETS, ASSET_COUNT } from './assets';
 
-const VERSION = '1.0.0';
+const VERSION = '1.1.0';
 
 const files = new Map<string, { mime: string; data: Buffer }>();
 for (const [path, [mime, b64]] of Object.entries(ASSETS)) {
@@ -21,11 +21,11 @@ const server = Bun.serve({
     let path = decodeURIComponent(url.pathname);
     if (path === '/' || path === '') path = '/index.html';
 
-    // SPA-fallback: /converter → index.html
+    // SPA fallback: /converter → index.html
     let entry = files.get(path);
     if (!entry && !path.includes('.')) entry = files.get('/index.html');
     if (!entry) {
-      return new Response('Не найдено: ' + path, { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
+      return new Response('Not found: ' + path, { status: 404, headers: { 'content-type': 'text/plain; charset=utf-8' } });
     }
     const headers: Record<string, string> = {
       'content-type': entry.mime,
@@ -49,20 +49,20 @@ function openBrowser(target: string) {
   try {
     Bun.spawn(cmd, { stdout: 'ignore', stderr: 'ignore', stdin: 'ignore' });
   } catch {
-    /* браузер не открылся — адрес всё равно напечатан */
+    /* the browser did not open — the address is printed anyway */
   }
 }
 
 const line = '─'.repeat(56);
 console.log('');
-console.log(`\x1b[36m  APK Builder ${VERSION}\x1b[0m — студия сборки Android-приложений`);
+console.log(`\x1b[36m  APK Builder ${VERSION}\x1b[0m — Android app build studio`);
 console.log(`  ${line}`);
-console.log(`  Локальный адрес : ${url}`);
-console.log(`  Файлов встроено : ${ASSET_COUNT}`);
-console.log(`  Режим           : офлайн, без Android SDK`);
+console.log(`  Local address  : ${url}`);
+console.log(`  Files embedded : ${ASSET_COUNT}`);
+console.log(`  Mode           : offline, no Android SDK`);
 console.log(`  ${line}`);
-console.log('  Окно можно закрыть — приложение откроется в браузере.');
-console.log('  Чтобы остановить, нажмите Ctrl+C.');
+console.log('  You can close this window — the app opens in your browser.');
+console.log('  Press Ctrl+C to stop.');
 console.log('');
 
 openBrowser(url);

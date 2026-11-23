@@ -1,5 +1,5 @@
 /**
- * Чтение бинарного Android XML (AXML) → обычный XML.
+ * Reading binary Android XML (AXML) → plain XML.
  */
 import { dec } from '../bytes';
 
@@ -33,7 +33,7 @@ export interface StringPool {
 export function readStringPool(buf: Uint8Array, offset: number): StringPool {
   const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
   const type = dv.getUint16(offset, true);
-  if (type !== RES_STRING_POOL_TYPE) throw new Error(`StringPool: неверный тип 0x${type.toString(16)}`);
+  if (type !== RES_STRING_POOL_TYPE) throw new Error(`StringPool: invalid type 0x${type.toString(16)}`);
   const headerSize = dv.getUint16(offset + 2, true);
   const stringCount = dv.getUint32(offset + 8, true);
   const styleCount = dv.getUint32(offset + 12, true);
@@ -116,7 +116,7 @@ function valueToString(dataType: number, data: number, pool: string[]): string {
 
 export function parseAxml(buf: Uint8Array): AxmlNode {
   const dv = new DataView(buf.buffer, buf.byteOffset, buf.byteLength);
-  if (dv.getUint16(0, true) !== RES_XML_TYPE) throw new Error('AXML: неверный заголовок');
+  if (dv.getUint16(0, true) !== RES_XML_TYPE) throw new Error('AXML: invalid header');
   const pool = readStringPool(buf, 8).strings;
 
   let p = 8;

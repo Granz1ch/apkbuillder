@@ -21,7 +21,7 @@ import { getErrorDef } from '../engine/errors';
 import { getOrCreateKey } from '../engine/keyring';
 import { downloadBytes, readFileBytes, slugify, timestampSlug } from '../lib/utils';
 
-const STEPS = ['Чтение архива', 'Анализ split-модулей', 'Слияние dex / lib / assets', 'Подпись APK v2'];
+const STEPS = ['Reading the archive', 'Analyzing split modules', 'Merging dex / lib / assets', 'Signing the APK v2'];
 
 export function XapkPage() {
   const setFile = useStore((s) => s.setFile);
@@ -50,7 +50,7 @@ export function XapkPage() {
       setBytes(b);
       const a = analyzeXapk(b, f.name);
       setAnalysis(a);
-      log('ok', `XAPK проанализирован: ${a.splits.length} APK, ${formatBytes(a.totalSize)}`);
+      log('ok', `XAPK analyzed: ${a.splits.length} APKs, ${formatBytes(a.totalSize)}`);
     } catch (e: unknown) {
       const id = (e as any)?.code ?? (e instanceof Error && e.message.startsWith('E-') ? e.message.slice(0, 6) : 'E-4001');
       const def = getErrorDef(id);
@@ -83,13 +83,13 @@ export function XapkPage() {
       log('ok', `XAPK → APK: ${name} (${formatBytes(res.size)})`);
       res.warnings.forEach((w) => log('warn', w, w.startsWith('E-') ? w.slice(0, 6) : undefined));
       pushHistory({ id: `${Date.now()}`, type: 'xapk', name, size: res.size, at: Date.now(), path: outputPath, ok: true });
-      toast('ok', 'APK готов', `${name} · ${formatBytes(res.size)}`);
+      toast('ok', 'APK is ready', `${name} · ${formatBytes(res.size)}`);
     } catch (e: unknown) {
       const id = (e as any)?.code ?? 'E-4002';
       const def = getErrorDef(id);
       setError({ id, title: def.title, detail: e instanceof Error ? e.message : String(e) });
       log('err', `${def.title}: ${e instanceof Error ? e.message : String(e)}`, id);
-      toast('err', 'Ошибка конвертации', def.title);
+      toast('err', 'Conversion failed', def.title);
     } finally {
       setBusy(false);
     }
@@ -102,14 +102,14 @@ export function XapkPage() {
         eyebrow="XAPK → APK"
         title={
           <>
-            Split-архив в <em>один APK</em>
+            A split archive into <em>one APK</em>
           </>
         }
-        sub="XAPK и APKS содержат базовый APK и split-модули. Мы объединяем dex, нативные библиотеки и ассеты в один файл и подписываем его."
+        sub="XAPK and APKS contain a base APK and split modules. We merge dex, native libraries and assets into one file and sign it."
         actions={
           analysis && !result ? (
             <Button variant="primary" icon={<Merge size={15} />} onClick={doConvert} disabled={busy}>
-              Конвертировать
+              Convert
             </Button>
           ) : null
         }
@@ -118,18 +118,18 @@ export function XapkPage() {
       {!analysis && !busy && (
         <Card>
           <div style={{ padding: 24 }}>
-            <Dropzone accept=".xapk,.apks,application/zip" onFiles={onFile} title="Перетащите .xapk или .apks" sub="Обычные APK тоже поддерживаются — они будут переподписаны">
+            <Dropzone accept=".xapk,.apks,application/zip" onFiles={onFile} title="Drop a .xapk or .apks" sub="Plain APKs are supported too — they will be re-signed">
               <div className="ico">
                 <PackageOpen />
               </div>
-              <div className="t">Перетащите .xapk или .apks</div>
-              <div className="s">Файл обрабатывается локально</div>
+              <div className="t">Drop a .xapk or .apks</div>
+              <div className="s">The file is processed locally</div>
             </Dropzone>
             <div className="grid g-3 mt-20">
               {[
-                { i: Layers, t: 'Анализ', d: 'Показываем все split-модули, их размер и содержимое' },
-                { i: Merge, t: 'Слияние', d: 'classes2.dex…N, lib/*, assets/* переносятся в базовый APK' },
-                { i: ShieldCheck, t: 'Подпись', d: 'Готовый APK подписывается вашим ключом по схеме v2' },
+                { i: Layers, t: 'Analyze', d: 'Shows every split module, its size and contents' },
+                { i: Merge, t: 'Merge', d: 'classes2.dex…N, lib/* and assets/* are moved into the base APK' },
+                { i: ShieldCheck, t: 'Sign', d: 'The resulting APK is signed with your key using the v2 scheme' },
               ].map((x) => {
                 const I = x.i;
                 return (
@@ -151,7 +151,7 @@ export function XapkPage() {
         <Card>
           <div className="flex center col gap-10" style={{ padding: 60 }}>
             <Loader2 size={24} className="pulse-soft" style={{ color: 'var(--accent)' }} />
-            <div style={{ fontSize: 13 }}>Анализируем архив…</div>
+            <div style={{ fontSize: 13 }}>Analyzing the archive…</div>
           </div>
         </Card>
       )}
@@ -178,18 +178,18 @@ export function XapkPage() {
               icon={<PackageOpen size={16} />}
               tone="teal"
               title={analysis.appName || filename}
-              sub={`${analysis.format.toUpperCase()} · ${analysis.packageName || 'пакет не указан'}`}
+              sub={`${analysis.format.toUpperCase()} · ${analysis.packageName || 'package unknown'}`}
               right={<Badge tone="neutral">{formatBytes(analysis.totalSize)}</Badge>}
             />
             <div style={{ padding: 16 }}>
               <table className="table">
                 <thead>
                   <tr>
-                    <th>Модуль</th>
-                    <th>Тип</th>
+                    <th>Module</th>
+                    <th>Type</th>
                     <th>Dex</th>
                     <th>Lib</th>
-                    <th className="r">Размер</th>
+                    <th className="r">Size</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -215,17 +215,17 @@ export function XapkPage() {
             <Card pad>
               <div className="switch-row" style={{ paddingTop: 0 }}>
                 <div>
-                  <div className="t">Включать split-модули</div>
-                  <div className="d">Объединять dex, библиотеки и ассеты из модулей</div>
+                  <div className="t">Include split modules</div>
+                  <div className="d">Merge dex, libraries and assets from the modules</div>
                 </div>
                 <Switch on={includeSplits} onChange={setIncludeSplits} />
               </div>
               <div className="flex gap-8 mt-8" style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.55 }}>
                 <Info size={14} style={{ flex: 'none', marginTop: 1 }} />
-                resources.arsc из split-модулей не объединяется — используются ресурсы базового APK.
+                resources.arsc from split modules is not merged — the base APK resources are used.
               </div>
               <Button variant="primary" size="lg" block icon={<Merge size={16} />} onClick={doConvert} disabled={busy} className="mt-16">
-                Конвертировать в APK
+                Convert to APK
               </Button>
             </Card>
 
@@ -255,14 +255,14 @@ export function XapkPage() {
                     <FileArchive size={17} />
                   </div>
                   <div style={{ flex: 1 }}>
-                    <div style={{ fontWeight: 620 }}>APK собран</div>
+                    <div style={{ fontWeight: 620 }}>APK built</div>
                     <div className="mono tiny" style={{ color: 'var(--text-3)', marginTop: 3, wordBreak: 'break-all' }}>
                       xapkconvs/{apkName}
                     </div>
                     <div className="flex gap-8 mt-8" style={{ flexWrap: 'wrap' }}>
                       <Badge tone="ok">{formatBytes(result.size)}</Badge>
-                      <Badge tone="neutral">{result.merged.length} объединено</Badge>
-                      {result.skipped.length > 0 && <Badge tone="warn">{result.skipped.length} пропущено</Badge>}
+                      <Badge tone="neutral">{result.merged.length} merged</Badge>
+                      {result.skipped.length > 0 && <Badge tone="warn">{result.skipped.length} skipped</Badge>}
                     </div>
                   </div>
                 </div>
@@ -271,7 +271,7 @@ export function XapkPage() {
                     {result.merged.slice(0, 6).map((m) => (
                       <div key={m} className="mono truncate" style={{ lineHeight: 1.6 }}>· {m}</div>
                     ))}
-                    {result.merged.length > 6 && <div className="mono">+ ещё {result.merged.length - 6}</div>}
+                    {result.merged.length > 6 && <div className="mono">+ {result.merged.length - 6} more</div>}
                   </div>
                 )}
                 {result.warnings.length > 0 && (
@@ -291,7 +291,7 @@ export function XapkPage() {
                   className="mt-16"
                   onClick={() => downloadBytes(result.apk, apkName, 'application/vnd.android.package-archive')}
                 >
-                  Скачать APK
+                  Download APK
                 </Button>
               </Card>
             )}

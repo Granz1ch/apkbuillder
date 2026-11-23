@@ -1,4 +1,4 @@
-/** Работа с иконками: загрузка дефолтной и ресайз через canvas. */
+/** Icon helpers: default icon loading and canvas resizing. */
 
 let defaultIcon: Uint8Array | null = null;
 
@@ -45,7 +45,7 @@ export async function pngInfo(data: Uint8Array): Promise<{ width: number; height
   }
 }
 
-/** Рисует иконку-заглушку (если нет интернета и ассетов). */
+/** Draws a placeholder icon (when there is no network or assets). */
 export function makeFallbackIcon(size = 192): Uint8Array {
   const canvas = document.createElement('canvas');
   canvas.width = size;

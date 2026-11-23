@@ -1,7 +1,7 @@
 import React, { forwardRef } from 'react';
 import { Loader2, X, Check, AlertTriangle, Info, XCircle } from 'lucide-react';
 
-/* ---------------- кнопка ---------------- */
+/* ---------------- button ---------------- */
 type BtnProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   variant?: 'default' | 'primary' | 'ghost' | 'danger';
   size?: 'sm' | 'md' | 'lg';
@@ -34,7 +34,7 @@ export const Button = forwardRef<HTMLButtonElement, BtnProps>(function Button(
   );
 });
 
-/* ---------------- поле ---------------- */
+/* ---------------- field ---------------- */
 export function Field({
   label,
   required,
@@ -91,7 +91,7 @@ export function Select({
   );
 }
 
-/* ---------------- бейдж ---------------- */
+/* ---------------- badge ---------------- */
 export function Badge({
   tone = 'neutral',
   children,
@@ -110,7 +110,7 @@ export function Badge({
   );
 }
 
-/* ---------------- карточка ---------------- */
+/* ---------------- card ---------------- */
 export function Card({
   children,
   className = '',
@@ -155,7 +155,7 @@ export function CardHead({
   );
 }
 
-/* ---------------- прогресс ---------------- */
+/* ---------------- progress ---------------- */
 export function Progress({ value, className = '' }: { value: number; className?: string }) {
   return (
     <div className={`progress ${className}`}>
@@ -164,12 +164,12 @@ export function Progress({ value, className = '' }: { value: number; className?:
   );
 }
 
-/* ---------------- переключатель ---------------- */
+/* ---------------- switch ---------------- */
 export function Switch({ on, onChange }: { on: boolean; onChange: (v: boolean) => void }) {
   return <div className={`switch ${on ? 'on' : ''}`} onClick={() => onChange(!on)} role="switch" aria-checked={on} />;
 }
 
-/* ---------------- пустое состояние ---------------- */
+/* ---------------- empty state ---------------- */
 export function Empty({ icon, title, sub, action }: { icon?: React.ReactNode; title: string; sub?: string; action?: React.ReactNode }) {
   return (
     <div className="empty">
@@ -181,7 +181,7 @@ export function Empty({ icon, title, sub, action }: { icon?: React.ReactNode; ti
   );
 }
 
-/* ---------------- модалка ---------------- */
+/* ---------------- modal ---------------- */
 export function Modal({
   open,
   onClose,
@@ -208,7 +208,7 @@ export function Modal({
             <div className="modal-title">{title}</div>
             {sub && <div className="modal-sub">{sub}</div>}
           </div>
-          <button className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Закрыть">
+          <button className="btn btn-ghost btn-icon" onClick={onClose} aria-label="Close">
             <X size={16} />
           </button>
         </div>
@@ -219,7 +219,7 @@ export function Modal({
   );
 }
 
-/* ---------------- разное ---------------- */
+/* ---------------- misc ---------------- */
 export function Kbd({ children }: { children: React.ReactNode }) {
   return <span className="kbd">{children}</span>;
 }
@@ -258,9 +258,9 @@ export function Divider() {
 
 export function formatBytes(n: number): string {
   if (!Number.isFinite(n) || n < 0) return '—';
-  if (n < 1024) return `${n} Б`;
-  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} КБ`;
-  return `${(n / 1024 / 1024).toFixed(2)} МБ`;
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / 1024 / 1024).toFixed(2)} MB`;
 }
 
 export function formatTime(ts: number): string {

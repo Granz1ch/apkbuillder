@@ -1,6 +1,6 @@
 /**
- * Генератор resources.arsc — таблицы ресурсов.
- * Минимальная реализация: один пакет, типы string и drawable.
+ * resources.arsc generator — the resource table.
+ * Minimal implementation: one package, string and drawable types.
  */
 import { ByteWriter, enc } from './bytes';
 
@@ -55,7 +55,7 @@ function pool(strings: string[], utf8 = true): Uint8Array {
 
 export interface ArscEntry {
   key: string;
-  /** для string — значение; для drawable — путь к файлу */
+  /** for string — the value; for drawable — the file path */
   value: string;
   isFile?: boolean;
 }
@@ -86,7 +86,7 @@ export function buildResources(packageName: string, resources: ArscResource[]): 
     return i;
   };
 
-  // Сначала собираем все строки значений
+  // First collect all value strings
   for (const r of resources) for (const e of r.entries) addGlobal(e.value);
 
   const globalPool = pool(globalStrings);
@@ -107,7 +107,7 @@ export function buildResources(packageName: string, resources: ArscResource[]): 
   for (const r of resources) for (const e of r.entries) addKey(e.key);
   const keyPool = pool(keyNames);
 
-  // ----- содержимое пакета -----
+  // ----- package contents -----
   const chunks: Uint8Array[] = [];
   const ids: Record<string, number> = {};
 
@@ -175,8 +175,8 @@ export function buildResources(packageName: string, resources: ArscResource[]): 
     }
   });
 
-  // ----- пакет -----
-  const typeStringsOff = 28 + 256; // после заголовка пакета
+  // ----- package -----
+  const typeStringsOff = 28 + 256; // after the package header
   const keyStringsOff = typeStringsOff + typePool.length;
   const packageSize = keyStringsOff + keyPool.length + chunks.reduce((a, b) => a + b.length, 0);
 

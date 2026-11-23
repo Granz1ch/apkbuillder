@@ -51,12 +51,12 @@ export function Signing() {
       });
       const stored = await exportKey(kp, alias.trim());
       addKey(stored);
-      log('ok', `Создан ключ «${alias}» · RSA-2048 · SHA-256`);
-      toast('ok', 'Ключ создан', `${alias.trim()} · отпечаток ${stored.fingerprint.slice(0, 23)}…`);
+      log('ok', `Key created: "${alias}" · RSA-2048 · SHA-256`);
+      toast('ok', 'Key created', `${alias.trim()} · fingerprint ${stored.fingerprint.slice(0, 23)}…`);
       setAlias('');
     } catch (e) {
-      log('err', `Не удалось создать ключ: ${e}`, 'E-5001');
-      toast('err', 'Ошибка создания ключа', String(e));
+      log('err', `Failed to create the key: ${e}`, 'E-5001');
+      toast('err', 'Key creation failed', String(e));
     } finally {
       setCreating(false);
     }
@@ -81,7 +81,7 @@ export function Signing() {
       `${k.alias}.apkbuilder-key.json`,
       'application/json',
     );
-    log('info', `Ключ «${k.alias}» экспортирован`);
+    log('info', `Key "${k.alias}" exported`);
   };
 
   const importKeyFile = async (fs: File[]) => {
@@ -94,7 +94,7 @@ export function Signing() {
         data = JSON.parse(text);
       } catch {
         const m = /-----BEGIN PRIVATE KEY-----([\s\S]+?)-----END PRIVATE KEY-----/.exec(text);
-        if (!m) throw new Error('Не JSON и не PEM');
+        if (!m) throw new Error('Not JSON and not PEM');
         data = { privateKey: m[1].replace(/\s+/g, ''), publicKey: '', certificate: '' };
       }
       const stored: StoredKey = {
@@ -105,14 +105,14 @@ export function Signing() {
         privateKey: data.privateKey,
         fingerprint: data.fingerprint || '',
       };
-      // проверим, что ключ импортируется
+      // make sure the key can be imported
       await importStoredKey(stored);
       addKey(stored);
-      log('ok', `Ключ «${stored.alias}» импортирован`);
-      toast('ok', 'Ключ импортирован', stored.alias);
+      log('ok', `Key "${stored.alias}" imported`);
+      toast('ok', 'Key imported', stored.alias);
     } catch (e) {
-      log('err', `Не удалось импортировать ключ: ${e}`, 'E-5001');
-      toast('err', 'Ошибка импорта', 'Файл должен быть JSON-ключом APK Builder или PKCS#8 PEM');
+      log('err', `Failed to import the key: ${e}`, 'E-5001');
+      toast('err', 'Import failed', 'The file must be an APK Builder JSON key or a PKCS#8 PEM');
     }
   };
 
@@ -120,7 +120,7 @@ export function Signing() {
     const f = fs[0];
     if (!f) return;
     if (!keys.length) {
-      toast('err', 'Нет ключей', 'Сначала создайте ключ подписи');
+      toast('err', 'No keys', 'Create a signing key first');
       return;
     }
     setSignBusy(true);
@@ -140,11 +140,11 @@ export function Signing() {
       const path = `build/${name}`;
       setFile(path, signed.bytes);
       setSignResult({ name, size: signed.bytes.length, path });
-      log('ok', `APK подписан ключом «${stored!.alias}»: ${name}`);
-      toast('ok', 'APK подписан', `${name} · ${formatBytes(signed.bytes.length)}`);
+      log('ok', `APK signed with "${stored!.alias}": ${name}`);
+      toast('ok', 'APK signed', `${name} · ${formatBytes(signed.bytes.length)}`);
     } catch (e) {
-      log('err', `Ошибка подписи: ${e}`, 'E-5001');
-      toast('err', 'Не удалось подписать', String(e));
+      log('err', `Signing failed: ${e}`, 'E-5001');
+      toast('err', 'Could not sign', String(e));
     } finally {
       setSignBusy(false);
     }
@@ -158,9 +158,9 @@ export function Signing() {
       const bytes = await readFileBytes(f);
       const info = await inspectSignature(bytes);
       setVerify({ name: f.name, info });
-      log(info.signedV2 ? 'ok' : 'warn', `Проверка подписи ${f.name}: ${info.signedV2 ? 'v2 ✓' : 'подпись не найдена'}`);
+      log(info.signedV2 ? 'ok' : 'warn', `Signature check ${f.name}: ${info.signedV2 ? 'v2 ✓' : 'no signature found'}`);
     } catch (e) {
-      toast('err', 'Не удалось проверить', String(e));
+      toast('err', 'Check failed', String(e));
     } finally {
       setVerifyBusy(false);
     }
@@ -170,13 +170,13 @@ export function Signing() {
     <Page>
       <PageHead
         num="05"
-        eyebrow="Подпись"
+        eyebrow="Signing"
         title={
           <>
-            Ключи и <em>подпись APK</em>
+            Keys and <em>APK signing</em>
           </>
         }
-        sub="Каждый APK должен быть подписан. Создайте ключ, подпишите готовый APK или проверьте чужую подпись."
+        sub="Every APK must be signed. Create a key, sign a finished APK or verify someone else's signature."
         actions={
           <Badge tone="accent" icon={<ShieldCheck size={11} />}>
             APK Signature Scheme v2
@@ -186,17 +186,17 @@ export function Signing() {
 
       <div className="grid g-23" style={{ alignItems: 'start' }}>
         <div className="col gap-16">
-          {/* ключи */}
+          {/* keys */}
           <Card>
             <CardHead
               icon={<KeyRound size={16} />}
               tone="teal"
-              title="Ключи подписи"
-              sub={`${keys.length} ключей · RSA-2048 · SHA-256`}
+              title="Signing keys"
+              sub={`${keys.length} keys · RSA-2048 · SHA-256`}
               right={
                 <Dropzone accept=".json,.pem,.key" onFiles={importKeyFile} compact>
                   <div className="flex gap-6 center tiny" style={{ color: 'var(--text-2)' }}>
-                    <Upload size={12} /> Импорт
+                    <Upload size={12} /> Import
                   </div>
                 </Dropzone>
               }
@@ -207,16 +207,16 @@ export function Signing() {
                   mono
                   value={alias}
                   onChange={(e) => setAlias(e.target.value)}
-                  placeholder="имя ключа, например release-key"
+                  placeholder="key alias, e.g. release-key"
                   onKeyDown={(e) => e.key === 'Enter' && createKey()}
                 />
                 <Button variant="primary" icon={creating ? undefined : <Plus size={15} />} loading={creating} onClick={createKey}>
-                  Создать
+                  Create
                 </Button>
               </div>
 
               {keys.length === 0 ? (
-                <Empty icon={<Lock size={18} />} title="Ключей пока нет" sub="Создайте ключ — он автоматически используется при сборке" />
+                <Empty icon={<Lock size={18} />} title="No keys yet" sub="Create a key — it is used automatically when building" />
               ) : (
                 <div className="col gap-8">
                   {keys.map((k) => (
@@ -235,7 +235,7 @@ export function Signing() {
                         </div>
                       </div>
                       <Button variant="ghost" size="sm" icon={<Download size={13} />} onClick={() => exportKeyFile(k)}>
-                        Экспорт
+                        Export
                       </Button>
                       <Button
                         variant="ghost"
@@ -243,10 +243,10 @@ export function Signing() {
                         icon={<Trash2 size={13} />}
                         onClick={() => {
                           removeKey(k.alias);
-                          log('warn', `Ключ «${k.alias}» удалён`);
+                          log('warn', `Key "${k.alias}" deleted`);
                         }}
                       >
-                        <span className="hide-sm">Удалить</span>
+                        <span className="hide-sm">Delete</span>
                       </Button>
                     </div>
                   ))}
@@ -255,22 +255,22 @@ export function Signing() {
             </div>
           </Card>
 
-          {/* подпись APK */}
+          {/* APK signing */}
           <Card>
             <CardHead
               icon={<FileCheck2 size={16} />}
               tone="pink"
-              title="Подписать APK"
-              sub="Старая подпись удаляется, ставится ваша"
-              right={keys[0] ? <Badge tone="neutral">ключ: {keys[0].alias}</Badge> : null}
+              title="Sign an APK"
+              sub="The old signature is removed and yours is applied"
+              right={keys[0] ? <Badge tone="neutral">key: {keys[0].alias}</Badge> : null}
             />
             <div style={{ padding: 16 }} className="col gap-12">
               <Dropzone accept=".apk" onFiles={(fs) => signApk(fs)} style={signBusy ? { pointerEvents: 'none', opacity: 0.6 } : undefined}>
                 <div className="ico">
                   {signBusy ? <Loader2 size={20} className="pulse-soft" /> : <Upload size={20} />}
                 </div>
-                <div className="t">{signBusy ? 'Подписываем…' : 'Перетащите APK для подписи'}</div>
-                <div className="s">или нажмите, чтобы выбрать файл</div>
+                <div className="t">{signBusy ? 'Signing…' : 'Drop an APK to sign'}</div>
+                <div className="s">or click to pick a file</div>
               </Dropzone>
               {signResult && (
                 <div className="flex gap-12" style={{ alignItems: 'center', padding: '10px 12px', borderRadius: 10, background: 'rgba(52,211,153,.07)', border: '1px solid rgba(52,211,153,.2)' }}>
@@ -283,57 +283,57 @@ export function Signing() {
                     const f = useStore.getState().files[signResult.path];
                     if (f) downloadBytes(f, signResult.name, 'application/vnd.android.package-archive');
                   }}>
-                    Скачать
+                    Download
                   </Button>
                 </div>
               )}
             </div>
           </Card>
 
-          {/* проверка */}
+          {/* verification */}
           <Card>
-            <CardHead icon={<ShieldCheck size={16} />} tone="amber" title="Проверить подпись" sub="Разбор APK Signature Block и сертификата" />
+            <CardHead icon={<ShieldCheck size={16} />} tone="amber" title="Verify a signature" sub="Parsing the APK Signature Block and the certificate" />
             <div style={{ padding: 16 }} className="col gap-12">
               <Dropzone accept=".apk" onFiles={verifyApk}>
                 <div className="ico">
                   {verifyBusy ? <Loader2 size={20} className="pulse-soft" /> : <Fingerprint size={20} />}
                 </div>
-                <div className="t">Перетащите APK для проверки</div>
-                <div className="s">Покажем схему подписи, алгоритм и отпечаток сертификата</div>
+                <div className="t">Drop an APK to verify</div>
+                <div className="s">Shows the signature scheme, algorithm and certificate fingerprint</div>
               </Dropzone>
               {verify && (
                 <div className="col gap-8">
                   <div className="flex between" style={{ fontSize: 12.5 }}>
-                    <span className="muted">Файл</span>
+                    <span className="muted">File</span>
                     <span className="mono">{verify.name}</span>
                   </div>
                   <div className="flex between" style={{ fontSize: 12.5 }}>
                     <span className="muted">APK Signature v2</span>
-                    {verify.info.signedV2 ? <Badge tone="ok" icon={<CheckCircle2 size={11} />}>есть</Badge> : <Badge tone="err">нет</Badge>}
+                    {verify.info.signedV2 ? <Badge tone="ok" icon={<CheckCircle2 size={11} />}>present</Badge> : <Badge tone="err">missing</Badge>}
                   </div>
                   <div className="flex between" style={{ fontSize: 12.5 }}>
                     <span className="muted">APK Signature v3</span>
-                    {verify.info.signedV3 ? <Badge tone="ok">есть</Badge> : <Badge tone="neutral">нет</Badge>}
+                    {verify.info.signedV3 ? <Badge tone="ok">present</Badge> : <Badge tone="neutral">none</Badge>}
                   </div>
                   <div className="flex between" style={{ fontSize: 12.5 }}>
-                    <span className="muted">Алгоритм</span>
+                    <span className="muted">Algorithm</span>
                     <span className="mono tiny">{verify.info.algorithms[0] ?? '—'}</span>
                   </div>
                   {verify.info.certificateSubject && (
                     <div className="flex between" style={{ fontSize: 12.5 }}>
-                      <span className="muted">Владелец</span>
+                      <span className="muted">Owner</span>
                       <span className="mono tiny">{verify.info.certificateSubject}</span>
                     </div>
                   )}
                   {verify.info.validTo && (
                     <div className="flex between" style={{ fontSize: 12.5 }}>
-                      <span className="muted">Действителен до</span>
+                      <span className="muted">Valid until</span>
                       <span className="mono tiny">{verify.info.validTo}</span>
                     </div>
                   )}
                   {verify.info.certificateFingerprint && (
                     <div style={{ marginTop: 4 }}>
-                      <div className="muted tiny" style={{ marginBottom: 4 }}>Отпечаток SHA-256</div>
+                      <div className="muted tiny" style={{ marginBottom: 4 }}>SHA-256 fingerprint</div>
                       <div className="mono" style={{ fontSize: 10, color: 'var(--accent)', wordBreak: 'break-all', lineHeight: 1.5 }}>
                         {verify.info.certificateFingerprint}
                       </div>
@@ -347,19 +347,19 @@ export function Signing() {
 
         <div className="col gap-16">
           <Card pad>
-            <div className="section-title">Как это работает</div>
+            <div className="section-title">How it works</div>
             <div className="col gap-12" style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6 }}>
               <div className="flex gap-10">
                 <span className="mono" style={{ color: 'var(--accent)' }}>01</span>
-                <span>Генерируется пара RSA-2048 и самоподписанный сертификат X.509 — всё локально, в браузере.</span>
+                <span>An RSA-2048 key pair and a self-signed X.509 certificate are generated — all locally, in the browser.</span>
               </div>
               <div className="flex gap-10">
                 <span className="mono" style={{ color: 'var(--accent)' }}>02</span>
-                <span>APK подписывается по схеме v2 (RSA PKCS#1 v1.5 + SHA-256) — работает на Android 7.0+.</span>
+                <span>The APK is signed with the v2 scheme (RSA PKCS#1 v1.5 + SHA-256) — works on Android 7.0+.</span>
               </div>
               <div className="flex gap-10">
                 <span className="mono" style={{ color: 'var(--accent)' }}>03</span>
-                <span>Ключи хранятся в IndexedDB. Экспортируйте их — без ключа обновить приложение будет нельзя.</span>
+                <span>Keys are stored in IndexedDB. Export them — without the key the app cannot be updated.</span>
               </div>
             </div>
           </Card>
@@ -368,14 +368,14 @@ export function Signing() {
             <div className="flex gap-10" style={{ alignItems: 'flex-start' }}>
               <AlertTriangle size={15} style={{ color: 'var(--warn)', flex: 'none', marginTop: 2 }} />
               <div style={{ fontSize: 12, color: 'var(--text-3)', lineHeight: 1.6 }}>
-                Храните ключ в надёжном месте. Приложение, подписанное другим ключом, нельзя обновить поверх установленного.
+                Keep the key in a safe place. An app signed with a different key cannot be updated over the installed one.
               </div>
             </div>
           </Card>
 
           {keys[0] && (
             <Card pad>
-              <div className="section-title">Отпечаток активного ключа</div>
+              <div className="section-title">Active key fingerprint</div>
               <div className="mono" style={{ fontSize: 10, lineHeight: 1.7, color: 'var(--text-2)', wordBreak: 'break-all' }}>
                 {keys[0].fingerprint || '—'}
               </div>
@@ -386,10 +386,10 @@ export function Signing() {
                 className="mt-12"
                 onClick={() => {
                   navigator.clipboard?.writeText(keys[0].fingerprint);
-                  toast('ok', 'Скопировано');
+                  toast('ok', 'Copied');
                 }}
               >
-                Скопировать
+                Copy
               </Button>
             </Card>
           )}

@@ -1,4 +1,4 @@
-/** Простой key-value слой поверх IndexedDB. */
+/** A simple key-value layer on top of IndexedDB. */
 
 const DB_NAME = 'apk-builder';
 const DB_VERSION = 1;

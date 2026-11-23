@@ -1,6 +1,6 @@
 /**
- * Генерация самоподписанного X.509 сертификата и RSA-ключей (WebCrypto).
- * Нужно для подписи APK по схеме v2.
+ * Self-signed X.509 certificate and RSA key generation (WebCrypto).
+ * Required for APK signing with the v2 scheme.
  */
 import { concat, enc, fromBase64, toBase64 } from './bytes';
 
@@ -70,8 +70,8 @@ function utcTime(d: Date): string {
 }
 
 /**
- * Собирает самоподписанный сертификат.
- * SubjectPublicKeyInfo берётся из WebCrypto (уже в DER).
+ * Builds a self-signed certificate.
+ * SubjectPublicKeyInfo comes from WebCrypto (already DER).
  */
 export async function createSelfSignedCertificate(opts: {
   commonName: string;

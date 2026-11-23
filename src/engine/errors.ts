@@ -1,12 +1,12 @@
 /**
- * Каталог ошибок: у каждой — идентификатор, причина и способ исправления.
- * Диапазоны:
- *   E-1xxx — валидация кода (HTML/CSS/JS/Python)
- *   E-2xxx — сборка APK
- *   E-3xxx — декомпиляция
+ * Error catalog: every entry has an identifier, a cause and a way to fix it.
+ * Ranges:
+ *   E-1xxx — code validation (HTML/CSS/JS/Python)
+ *   E-2xxx — APK build
+ *   E-3xxx — decompilation
  *   E-4xxx — XAPK
- *   E-5xxx — ключи и подпись
- *   E-6xxx — движок / окружение
+ *   E-5xxx — keys and signing
+ *   E-6xxx — engine / environment
  */
 export interface ErrorDef {
   id: string;
@@ -18,208 +18,208 @@ export interface ErrorDef {
 }
 
 export const ERROR_CATALOG: ErrorDef[] = [
-  /* ---------------- валидация ---------------- */
+  /* ---------------- validation ---------------- */
   {
     id: 'E-1001',
-    title: 'Незакрытый HTML-тег',
-    cause: 'Открывающий тег не имеет парного закрывающего. Браузер закроет его автоматически, но структура документа может поехать.',
-    fix: 'Добавьте закрывающий тег </...> или сделайте элемент самозакрывающимся.',
+    title: 'Unclosed HTML tag',
+    cause: 'An opening tag has no matching closing tag. The browser will close it automatically, but the document structure may break.',
+    fix: 'Add the closing tag </...> or make the element self-closing.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1002',
-    title: 'Лишний закрывающий тег',
-    cause: 'Закрывающий тег не соответствует ни одному открытому элементу.',
-    fix: 'Удалите тег или проверьте вложенность — возможно, он должен закрывать другой элемент.',
+    title: 'Stray closing tag',
+    cause: 'A closing tag does not match any open element.',
+    fix: 'Remove the tag or check the nesting — it may be meant to close another element.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1003',
-    title: 'Несовпадение тегов',
-    cause: 'Закрывающий тег не совпадает с последним открытым.',
-    fix: 'Проверьте порядок закрывающих тегов: последним открывается — первым закрывается.',
+    title: 'Mismatched tags',
+    cause: 'The closing tag does not match the last opened element.',
+    fix: 'Check the order of closing tags: last opened must be closed first.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1004',
-    title: 'Синтаксическая ошибка JavaScript',
-    cause: 'Встроенный скрипт содержит синтаксическую ошибку и не будет исполнен.',
-    fix: 'Исправьте указанную позицию: проверьте скобки, запятые, кавычки и ключевые слова.',
+    title: 'JavaScript syntax error',
+    cause: 'An inline script contains a syntax error and will not run.',
+    fix: 'Fix the reported position: check brackets, commas, quotes and keywords.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1005',
-    title: 'Синтаксическая ошибка CSS',
-    cause: 'Браузер проигнорирует правило с ошибкой — стиль не применится.',
-    fix: 'Проверьте фигурные скобки, двоеточия и точки с запятой в правиле.',
+    title: 'CSS syntax error',
+    cause: 'The browser will skip the broken rule, so the style will not apply.',
+    fix: 'Check braces, colons and semicolons in the rule.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1006',
-    title: 'Незакрытая фигурная скобка',
-    cause: 'Количество { и } в CSS не совпадает.',
-    fix: 'Добавьте недостающую закрывающую скобку.',
+    title: 'Unclosed brace',
+    cause: 'The number of { and } characters in the CSS does not match.',
+    fix: 'Add the missing closing brace.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1007',
-    title: 'Отсутствует <!DOCTYPE html>',
-    cause: 'Без doctype браузер работает в режиме совместимости, что ломает современные стили.',
-    fix: 'Добавьте первой строкой: <!DOCTYPE html>',
+    title: 'Missing <!DOCTYPE html>',
+    cause: 'Without a doctype the browser falls back to quirks mode, which breaks modern styles.',
+    fix: 'Add <!DOCTYPE html> as the first line.',
     severity: 'warning',
     scope: 'validator',
   },
   {
     id: 'E-1008',
-    title: 'Дублирующийся id',
-    cause: 'Атрибут id должен быть уникальным в пределах документа.',
-    fix: 'Переименуйте дубликат или используйте класс.',
+    title: 'Duplicate id',
+    cause: 'The id attribute must be unique within a document.',
+    fix: 'Rename the duplicate or use a class instead.',
     severity: 'warning',
     scope: 'validator',
   },
   {
     id: 'E-1009',
-    title: 'Изображение без alt',
-    cause: 'Без альтернативного текста изображение недоступно для скринридеров и SEO.',
-    fix: 'Добавьте атрибут alt с описанием изображения.',
+    title: 'Image without alt',
+    cause: 'Without alternative text the image is inaccessible to screen readers and SEO.',
+    fix: 'Add an alt attribute describing the image.',
     severity: 'info',
     scope: 'validator',
   },
   {
     id: 'E-1010',
-    title: 'Синтаксическая ошибка Python',
-    cause: 'Интерпретатор не сможет выполнить файл.',
-    fix: 'Исправьте указанную строку: проверьте отступы, двоеточия и скобки.',
+    title: 'Python syntax error',
+    cause: 'The interpreter will not be able to run the file.',
+    fix: 'Fix the reported line: check indentation, colons and brackets.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1011',
-    title: 'Смешанные табы и пробелы',
-    cause: 'Python запрещает смешивать табуляцию и пробелы в отступах.',
-    fix: 'Используйте только пробелы (PEP 8 рекомендует 4 пробела на уровень).',
+    title: 'Mixed tabs and spaces',
+    cause: 'Python forbids mixing tabs and spaces in indentation.',
+    fix: 'Use spaces only (PEP 8 recommends 4 spaces per level).',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1012',
-    title: 'Неправильное имя пакета',
-    cause: 'Имя пакета Android должно содержать только латиницу, цифры, точки и подчёркивания, иметь минимум два сегмента и не начинаться с цифры.',
-    fix: 'Например: com.example.myapp',
+    title: 'Invalid package name',
+    cause: 'An Android package name may contain only latin letters, digits, dots and underscores, must have at least two segments and must not start with a digit.',
+    fix: 'For example: com.example.myapp',
     severity: 'error',
     scope: 'build',
   },
   {
     id: 'E-1013',
-    title: 'Пустой или слишком короткий код',
-    cause: 'В проекте нет ни одного файла с кодом — собирать нечего.',
-    fix: 'Добавьте HTML-файл или выберите другой исходник.',
+    title: 'Empty or too short source',
+    cause: 'The project has no source files at all — there is nothing to build.',
+    fix: 'Add an HTML file or pick another source.',
     severity: 'error',
     scope: 'validator',
   },
   {
     id: 'E-1014',
-    title: 'Некорректный URL',
-    cause: 'Адрес должен начинаться с http:// или https://.',
-    fix: 'Укажите полный адрес, например https://example.com',
+    title: 'Invalid URL',
+    cause: 'The address must start with http:// or https://.',
+    fix: 'Enter the full address, for example https://example.com',
     severity: 'error',
     scope: 'build',
   },
   {
     id: 'E-1015',
-    title: 'Не найден index.html',
-    cause: 'В папке проекта нет точки входа index.html.',
-    fix: 'Создайте index.html в корне папки проекта.',
+    title: 'index.html not found',
+    cause: 'The project folder has no index.html entry point.',
+    fix: 'Create index.html in the root of the project folder.',
     severity: 'error',
     scope: 'build',
   },
 
-  /* ---------------- сборка ---------------- */
+  /* ---------------- build ---------------- */
   {
     id: 'E-2001',
-    title: 'Не выбран ключ подписи',
-    cause: 'APK без подписи не установится на устройство.',
-    fix: 'Создайте ключ в разделе «Подпись» или выберите существующий.',
+    title: 'No signing key selected',
+    cause: 'An unsigned APK cannot be installed on a device.',
+    fix: 'Create a key in the "Signing" section or pick an existing one.',
     severity: 'error',
     scope: 'build',
   },
   {
     id: 'E-2002',
-    title: 'Ошибка генерации DEX',
-    cause: 'Не удалось скомпилировать байткод Activity.',
-    fix: 'Проверьте имя класса и повторите сборку.',
+    title: 'DEX generation failed',
+    cause: 'The Activity bytecode could not be compiled.',
+    fix: 'Check the class name and build again.',
     severity: 'error',
     scope: 'build',
   },
   {
     id: 'E-2003',
-    title: 'Ошибка сборки манифеста',
-    cause: 'Бинарный AndroidManifest.xml не смог быть сериализован.',
-    fix: 'Проверьте имя пакета, версию и разрешения.',
+    title: 'Manifest build failed',
+    cause: 'The binary AndroidManifest.xml could not be serialized.',
+    fix: 'Check the package name, version and permissions.',
     severity: 'error',
     scope: 'build',
   },
   {
     id: 'E-2004',
-    title: 'Слишком большой проект',
-    cause: 'Размер assets превышает разумный лимит (512 МБ).',
-    fix: 'Удалите лишние файлы или сожмите медиа.',
+    title: 'Project is too large',
+    cause: 'The assets exceed the reasonable limit (512 MB).',
+    fix: 'Remove unnecessary files or compress the media.',
     severity: 'error',
     scope: 'build',
   },
   {
     id: 'E-2005',
-    title: 'Недопустимое имя приложения',
-    cause: 'Имя приложения пустое.',
-    fix: 'Укажите отображаемое имя приложения.',
+    title: 'Invalid app name',
+    cause: 'The app name is empty.',
+    fix: 'Enter the display name of the application.',
     severity: 'error',
     scope: 'build',
   },
   {
     id: 'E-2006',
-    title: 'Некорректная иконка',
-    cause: 'Иконка должна быть PNG не меньше 48×48 px.',
-    fix: 'Загрузите PNG 192×192 или 512×512.',
+    title: 'Invalid icon',
+    cause: 'The icon must be a PNG of at least 48×48 px.',
+    fix: 'Upload a 192×192 or 512×512 PNG.',
     severity: 'error',
     scope: 'build',
   },
 
-  /* ---------------- декомпиляция ---------------- */
+  /* ---------------- decompilation ---------------- */
   {
     id: 'E-3001',
-    title: 'Файл не является APK',
-    cause: 'Не найден AndroidManifest.xml внутри архива.',
-    fix: 'Выберите корректный .apk файл.',
+    title: 'File is not an APK',
+    cause: 'No AndroidManifest.xml found inside the archive.',
+    fix: 'Pick a valid .apk file.',
     severity: 'error',
     scope: 'decompile',
   },
   {
     id: 'E-3002',
-    title: 'Повреждённый архив',
-    cause: 'ZIP-структура нарушена или архив запаролен.',
-    fix: 'Попробуйте другой файл или переархивируйте APK.',
+    title: 'Corrupted archive',
+    cause: 'The ZIP structure is broken or the archive is password protected.',
+    fix: 'Try another file or re-pack the APK.',
     severity: 'error',
     scope: 'decompile',
   },
   {
     id: 'E-3003',
-    title: 'Нет classes.dex',
-    cause: 'В приложении нет исполняемого кода (только ресурсы) либо он защищён.',
-    fix: 'Декомпиляция будет выполнена частично — только ресурсы и манифест.',
+    title: 'No classes.dex',
+    cause: 'The app has no executable code (resources only) or it is protected.',
+    fix: 'Decompilation will be partial — manifest and resources only.',
     severity: 'warning',
     scope: 'decompile',
   },
   {
     id: 'E-3004',
-    title: 'Манифест не декодирован',
-    cause: 'Бинарный XML имеет нестандартную структуру.',
-    fix: 'Будет сохранён исходный бинарный манифест.',
+    title: 'Manifest not decoded',
+    cause: 'The binary XML has a non-standard structure.',
+    fix: 'The original binary manifest will be saved instead.',
     severity: 'warning',
     scope: 'decompile',
   },
@@ -227,85 +227,85 @@ export const ERROR_CATALOG: ErrorDef[] = [
   /* ---------------- XAPK ---------------- */
   {
     id: 'E-4001',
-    title: 'Файл не является XAPK/APKS',
-    cause: 'В архиве нет manifest.json и base.apk.',
-    fix: 'Выберите корректный .xapk или .apks файл.',
+    title: 'File is not a XAPK/APKS',
+    cause: 'The archive has neither manifest.json nor base.apk.',
+    fix: 'Pick a valid .xapk or .apks file.',
     severity: 'error',
     scope: 'xapk',
   },
   {
     id: 'E-4002',
-    title: 'Отсутствует base.apk',
-    cause: 'Базовый APK не найден в архиве.',
-    fix: 'Проверьте целостность XAPK.',
+    title: 'base.apk is missing',
+    cause: 'The base APK was not found in the archive.',
+    fix: 'Check the integrity of the XAPK.',
     severity: 'error',
     scope: 'xapk',
   },
   {
     id: 'E-4003',
-    title: 'Несовместимые split-APK',
-    cause: 'Split-модули имеют разные подписи и не могут быть объединены в один APK.',
-    fix: 'Оставлен базовый APK без split-модулей.',
+    title: 'Incompatible split APKs',
+    cause: 'The split modules are signed with different keys and cannot be merged into one APK.',
+    fix: 'Only the base APK was kept, without split modules.',
     severity: 'warning',
     scope: 'xapk',
   },
   {
     id: 'E-4004',
-    title: 'Конфликт ресурсов при слиянии',
-    cause: 'Split-модуль содержит resources.arsc, который нельзя безопасно объединить.',
-    fix: 'Объединены только dex/lib/assets; ресурсы базового APK сохранены.',
+    title: 'Resource conflict on merge',
+    cause: 'A split module contains a resources.arsc that cannot be merged safely.',
+    fix: 'Only dex/lib/assets were merged; the base APK resources were kept.',
     severity: 'warning',
     scope: 'xapk',
   },
 
-  /* ---------------- ключи ---------------- */
+  /* ---------------- keys ---------------- */
   {
     id: 'E-5001',
-    title: 'Некорректный ключ',
-    cause: 'Файл ключа повреждён или не является PKCS#8.',
-    fix: 'Импортируйте корректный PKCS#8 (.pem) или создайте новый ключ.',
+    title: 'Invalid key',
+    cause: 'The key file is corrupted or is not PKCS#8.',
+    fix: 'Import a valid PKCS#8 (.pem) key or create a new one.',
     severity: 'error',
     scope: 'sign',
   },
   {
     id: 'E-5002',
-    title: 'APK уже подписан',
-    cause: 'Файл содержит подпись. Повторная подпись заменит её.',
-    fix: 'Это нормально — старая подпись будет удалена.',
+    title: 'APK is already signed',
+    cause: 'The file already contains a signature. Signing again replaces it.',
+    fix: 'That is fine — the old signature will be removed.',
     severity: 'info',
     scope: 'sign',
   },
   {
     id: 'E-5003',
-    title: 'Ключ не найден',
-    cause: 'Выбранный ключ был удалён.',
-    fix: 'Выберите другой ключ или создайте новый.',
+    title: 'Key not found',
+    cause: 'The selected key was deleted.',
+    fix: 'Pick another key or create a new one.',
     severity: 'error',
     scope: 'sign',
   },
 
-  /* ---------------- движок ---------------- */
+  /* ---------------- engine ---------------- */
   {
     id: 'E-6001',
-    title: 'WebCrypto недоступен',
-    cause: 'Браузер не поддерживает SubtleCrypto (нужен HTTPS или localhost).',
-    fix: 'Откройте приложение по HTTPS или в браузере с поддержкой WebCrypto.',
+    title: 'WebCrypto is unavailable',
+    cause: 'The browser does not support SubtleCrypto (HTTPS or localhost is required).',
+    fix: 'Open the app over HTTPS or in a browser with WebCrypto support.',
     severity: 'error',
     scope: 'engine',
   },
   {
     id: 'E-6002',
-    title: 'Не хватает памяти',
-    cause: 'Проект слишком большой для обработки в браузере.',
-    fix: 'Уменьшите размер проекта или закройте другие вкладки.',
+    title: 'Out of memory',
+    cause: 'The project is too large to process in the browser.',
+    fix: 'Reduce the project size or close other tabs.',
     severity: 'error',
     scope: 'engine',
   },
   {
     id: 'E-6003',
-    title: 'Ошибка чтения файла',
-    cause: 'Не удалось прочитать файл с диска.',
-    fix: 'Проверьте права доступа и повторите попытку.',
+    title: 'File read failed',
+    cause: 'The file could not be read from disk.',
+    fix: 'Check the permissions and try again.',
     severity: 'error',
     scope: 'engine',
   },
@@ -316,9 +316,9 @@ const MAP = new Map(ERROR_CATALOG.map((e) => [e.id, e]));
 export function getErrorDef(id: string): ErrorDef {
   return MAP.get(id) ?? {
     id,
-    title: 'Неизвестная ошибка',
-    cause: 'Описание отсутствует.',
-    fix: 'Обратитесь к документации.',
+    title: 'Unknown error',
+    cause: 'No description available.',
+    fix: 'Check the documentation.',
     severity: 'error',
     scope: 'engine',
   };
@@ -328,7 +328,7 @@ export interface AppError extends Error {
   code?: string;
 }
 
-/** Бросает ошибку с идентификатором из каталога. */
+/** Throws an error carrying an identifier from the catalog. */
 export function fail(id: string, detail?: string): never {
   const def = getErrorDef(id);
   const e = new Error(detail ? `${def.title}: ${detail}` : def.title) as AppError;
@@ -342,5 +342,5 @@ export function describeError(e: unknown): { id: string; title: string; detail: 
     const def = getErrorDef(id);
     return { id, title: def.title, detail: e.message };
   }
-  return { id: 'E-6003', title: 'Неизвестная ошибка', detail: String(e) };
+  return { id: 'E-6003', title: 'Unknown error', detail: String(e) };
 }

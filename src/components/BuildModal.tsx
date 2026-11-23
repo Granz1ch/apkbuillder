@@ -34,22 +34,22 @@ export function BuildModal({
     <Modal
       open={open}
       onClose={() => !running && onClose()}
-      title={error ? 'Сборка не удалась' : result ? 'APK готов' : 'Сборка приложения'}
+      title={error ? 'Build failed' : result ? 'APK is ready' : 'Building app'}
       sub={error ? error.id : result ? outputPath : undefined}
       width={520}
       footer={
         result ? (
           <>
             <Button variant="ghost" onClick={onClose}>
-              Закрыть
+              Close
             </Button>
             <Button variant="primary" icon={<Download size={15} />} onClick={onDownload}>
-              Скачать APK
+              Download APK
             </Button>
           </>
         ) : error ? (
           <Button variant="primary" onClick={onClose}>
-            Понятно
+            Got it
           </Button>
         ) : null
       }
@@ -94,19 +94,19 @@ export function BuildModal({
             <>
               <div className="grid g-3 mt-16">
                 <div className="kpi" style={{ padding: 14 }}>
-                  <div className="kpi-label">Размер</div>
+                  <div className="kpi-label">Size</div>
                   <div className="kpi-value" style={{ fontSize: 20 }}>
                     {formatBytes(result.size)}
                   </div>
                 </div>
                 <div className="kpi" style={{ padding: 14 }}>
-                  <div className="kpi-label">Файлов</div>
+                  <div className="kpi-label">Files</div>
                   <div className="kpi-value" style={{ fontSize: 20 }}>
                     {result.files.length}
                   </div>
                 </div>
                 <div className="kpi" style={{ padding: 14 }}>
-                  <div className="kpi-label">Подпись</div>
+                  <div className="kpi-label">Signature</div>
                   <div className="kpi-value" style={{ fontSize: 20 }}>
                     v2
                   </div>
@@ -124,7 +124,7 @@ export function BuildModal({
               )}
               <div className="mt-16" style={{ fontSize: 12, color: 'var(--text-3)' }}>
                 <div className="mono tiny" style={{ color: 'var(--text-4)', marginBottom: 6 }}>
-                  СОДЕРЖИМОЕ APK
+                  APK CONTENTS
                 </div>
                 <div className="col gap-4">
                   {result.files.slice(0, 8).map((f) => (
@@ -135,7 +135,7 @@ export function BuildModal({
                   ))}
                   {result.files.length > 8 && (
                     <div className="mono tiny" style={{ color: 'var(--text-4)' }}>
-                      + ещё {result.files.length - 8} файлов
+                      + {result.files.length - 8} more files
                     </div>
                   )}
                 </div>
