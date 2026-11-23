@@ -1,0 +1,52 @@
+/**
+ * Кладёт содержимое dist/ в desktop/assets.ts (base64), чтобы exe был одним файлом.
+ *   tsx tools/embed-assets.ts
+ */
+import { readdirSync, readFileSync, statSync, writeFileSync, mkdirSync } from 'node:fs';
+import { join, extname, posix } from 'node:path';
+
+const ROOT = new URL('..', import.meta.url).pathname;
+const DIST = join(ROOT, 'dist');
+
+const MIME: Record<string, string> = {
+  '.html': 'text/html; charset=utf-8',
+  '.js': 'text/javascript; charset=utf-8',
+  '.mjs': 'text/javascript; charset=utf-8',
+  '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8',
+  '.webmanifest': 'application/manifest+json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpeg',
+  '.svg': 'image/svg+xml',
+  '.woff2': 'font/woff2',
+  '.woff': 'font/woff',
+  '.ico': 'image/x-icon',
+  '.map': 'application/json',
+};
+
+function walk(dir: string, base = ''): [string, string, Buffer][] {
+  const out: [string, string, Buffer][] = [];
+  for (const name of readdirSync(dir)) {
+    const full = join(dir, name);
+    const rel = base ? `${base}/${name}` : name;
+    if (statSync(full).isDirectory()) out.push(...walk(full, rel));
+    else out.push([rel, MIME[extname(name).toLowerCase()] ?? 'application/octet-stream', readFileSync(full)]);
+  }
+  return out;
+}
+
+const files = walk(DIST).filter(([p]) => p !== 'apk-builder.apk');
+const lines = files.map(
+  ([p, m, b]) => `  ${JSON.stringify(p)}: [${JSON.stringify(m)}, ${JSON.stringify(b.toString('base64'))}],`,
+);
+const total = files.reduce((a, [, , b]) => a + b.length, 0);
+
+const out = `// Автогенерируется tools/embed-assets.ts — не редактировать.
+export const ASSETS: Record<string, [string, string]> = {
+${lines.join('\n')}
+};
+export const ASSET_COUNT = ${files.length};
+`;
+mkdirSync(join(ROOT, 'desktop'), { recursive: true });
+writeFileSync(join(ROOT, 'desktop', 'assets.ts'), out);
+console.log(`desktop/assets.ts: ${files.length} файлов, ${(total / 1024).toFixed(0)} КБ исходников, ${(out.length / 1024).toFixed(0)} КБ кода`);
